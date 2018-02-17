@@ -1,6 +1,8 @@
 # Copyright 2018      Cyril Roelandt
 #
 # Licensed under the 3-clause BSD license. See the LICENSE file.
+
+
 class InvalidPackageNameError(Exception):
     """Invalid package name or non-existing package."""
     def __init__(self, backend, pkg_name):

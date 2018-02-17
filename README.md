@@ -14,7 +14,7 @@ You may install upt from PyPI:
 
 You may also install it from the Git repository or a tarball:
 
-    $ python setup.py develop
+    $ python setup.py install
 
 By itself, upt is useless. It requires frontends and or backends to provide
 useful features. See the list of available frontends/backends at the end of this

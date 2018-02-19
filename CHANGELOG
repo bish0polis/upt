@@ -4,8 +4,12 @@ All notable changes to this project will be documented in this file.
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- upt.Package: Add a 'licenses' field
+
 ### Fixed
 - Fixed installation instructions in README.md
+- Add missing files to the tarball (LICENSE, CHANGELOG, README.md, tox.ini)
 
 ## [0.1.1] - 2018-02-17
 ### Fixed

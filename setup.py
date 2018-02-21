@@ -9,6 +9,10 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+def _install_reqs():
+    with open('requirements.txt') as f:
+        return f.read().split('\n')
+
 setup(
     name='upt',
     author='Cyril Roelandt',
@@ -25,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
     ],
-    install_requires = [],
+    install_requires = _install_reqs(),
     packages = find_packages(),
     entry_points = {
         'console_scripts': ['upt = upt.upt:main'],

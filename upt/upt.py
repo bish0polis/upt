@@ -60,6 +60,7 @@ class Package(object):
         - 'test': the test dependencies of the package.
       The values associated with these keys are always lists of
       PackageRequirement objects.
+    - licenses: a list of upt.licenses.License objects
     """
     def __init__(self, name, version, **kwargs):
         self.name = name
@@ -74,6 +75,7 @@ class Package(object):
         #     'test': [pkg3, ...]
         # }
         self.requirements = kwargs.get('requirements', {})
+        self.licenses = kwargs.get('licenses', [])
 
     def __str__(self):
         return f'{self.name}@{self.version}'

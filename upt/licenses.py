@@ -289,6 +289,21 @@ class GNUAfferoGeneralPublicLicenseThreeDotZeroPlus(DFSGCompatibleLicense,
     spdx_identifier = 'AGPL-3.0-or-later'
 
 
+class GNUFreeDocumentationLicenseOneDotOne(License):
+    name = 'GNU Free Documentation License v1.1'
+    spdx_identifier = 'GFDL-1.1'
+
+
+class GNUFreeDocumentationLicenseOneDotTwo(License):
+    name = 'GNU Free Documentation License v1.2'
+    spdx_identifier = 'GFDL-1.2'
+
+
+class GNUFreeDocumentationLicenseOneDotThree(License):
+    name = 'GNU Free Documentation License v1.3'
+    spdx_identifier = 'GFDL-1.3'
+
+
 class GNUGeneralPublicLicenseTwo(DFSGCompatibleLicense,
                                  GPLCompatibleLicense,
                                  OSIApprovedLicense):
@@ -522,9 +537,21 @@ class OpenSoftwareLicense(OSIApprovedLicense):
     spdx_identifier = 'OSL-3.0'
 
 
+class OpenSSLLicense(DFSGCompatibleLicense):
+    name = 'OpenSSL License'
+    spdx_identifier = 'OpenSSL'
+
+
 class OSETPublicLicenseVersionTwoDotOne(OSIApprovedLicense):
     name = 'OSET Public License version 2.1'
     spdx_identifier = 'OSET-PL-2.1'
+
+
+class PerlLicense(DFSGCompatibleLicense,
+                  GPLCompatibleLicense,
+                  OSIApprovedLicense):
+    name = 'Perl'
+    spdx_identifier = 'Artistic-1.0-Perl'
 
 
 class PHPLicenseThreeDotZero(OSIApprovedLicense):
@@ -561,6 +588,12 @@ class ReciprocalPublicLicenseOneDotFive(OSIApprovedLicense):
 class RicohSourceCodePublicLicense(OSIApprovedLicense):
     name = 'Ricoh Source Code Public License'
     spdx_identifier = 'RSCPL'
+
+
+class RubyLicense(DFSGCompatibleLicense,
+                  GPLCompatibleLicense):
+    name = 'Ruby License'
+    spdx_identifier = 'Ruby'
 
 
 class SILOpenFrontLicenseOneDotOne(DFSGCompatibleLicense,
@@ -627,6 +660,13 @@ class XNetLicense(OSIApprovedLicense):
 class ZopePublicLicenseTwoDotZero(OSIApprovedLicense, GPLCompatibleLicense):
     name = 'Zope Public License 2.0'
     spdx_identifier = 'ZPL-2.0'
+
+
+class ZlibLicense(DFSGCompatibleLicense,
+                  GPLCompatibleLicense,
+                  OSIApprovedLicense):
+    name = 'zlib License'
+    spdx_identifier = 'zlib'
 
 
 class ZlibLibpngLicense(DFSGCompatibleLicense,

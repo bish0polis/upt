@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unrealeased]
+## [0.2.1] - 2018-03-04
 ### Added
 - upt.licenses: Add the OpenSSL license
 - upt.licenses: Add the Perl license

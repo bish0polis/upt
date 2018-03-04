@@ -18,7 +18,7 @@ setup(
     author='Cyril Roelandt',
     author_email='tipecaml@gmail.com',
     url='https://framagit.org/upt/upt',
-    version='0.2',
+    version='0.2.1',
     description='Package software from any package manager to any distribution',
     long_description=long_description,
     classifiers=[

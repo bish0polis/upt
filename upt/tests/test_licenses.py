@@ -71,3 +71,10 @@ class TestLicenses(unittest.TestCase):
         match_fn.return_value = match
         self.assertIsInstance(licenses.guess_from_file('/some/path'),
                               licenses.BSDThreeClauseLicense)
+
+    def test_equality(self):
+        self.assertEqual(licenses.BSDThreeClauseLicense(),
+                         licenses.BSDThreeClauseLicense())
+
+        self.assertNotEqual(licenses.BSDTwoClauseLicense(),
+                            licenses.BSDThreeClauseLicense())

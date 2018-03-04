@@ -21,6 +21,9 @@ class License(object):
     def is_dfsg_compatible(self):
         return False
 
+    def __eq__(self, other):
+        return self.spdx_identifier == other.spdx_identifier
+
 
 class OSIApprovedLicense(License):
     def is_osi_approved(self):

@@ -24,6 +24,18 @@ document. You may install them by running:
     $ pip install upt-openbsd
     $ pip install ...
 
+You may also install upt and all its frontends by running:
+
+    $ pip install upt[frontends]
+
+You may also install upt and all its backends by running:
+
+    $ pip install upt[backends]
+
+You may also install upt and all of its frontends and backends by running:
+
+    $ pip install upt[frontends,backends]
+
 
 ## Usage
 You may get help by running:

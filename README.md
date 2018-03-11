@@ -81,7 +81,8 @@ Since packaging is a tedious and repetitive task, packagers have written tools
 to assist them in this endeavor: Guix has "guix import", a collection of scripts
 that parse CPAN, PyPI and other language specific package repositories and
 generate a Guix package definition; Debian has tools such as pypi2deb,
-npm2deb... The same goes for RPM-based distributions.
+npm2deb... The same goes for RPM-based distributions, and other operating
+systems.
 
 Let's talk about PyPI. It seems that (almost) every single distribution has (or
 will have) a tool that parses PyPI. Whatever the distribution may be (Debian,

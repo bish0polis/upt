@@ -72,9 +72,9 @@ The package definition will be written to the standard output.
 There are two kinds of places from where packages may be installed:
 
 - language specific package repositories (CPAN, CRAN, CTAN, Hackage, NPM, PyPI,
-  RubyGems)
+  RubyGems, etc.)
 - traditional, language agnostic package managers (apt for Debian, dnf for
-  Fedora, Nix, Guix, pkgsrc, the OpenBSD ports)
+  Fedora, Nix, Guix, pkgsrc, the OpenBSD ports, etc.)
 
 Packages available on the former are usually also packaged in the latter ones.
 Since packaging is a tedious and repetitive task, packagers have written tools

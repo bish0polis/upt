@@ -179,21 +179,30 @@ separate projects, so you should not send your patches to upt.
 ## Adding frontends or backends
 
 ### Adding a frontend
-Your setup.py should use the entry points like this:
+Your setup.cfg should use an entry point, like this:
+
+```
+# Taken from the upt-rubygems project
+[options.entry_points]
+upt.frontends =
+    rubygems = upt_rubygems.upt_rubygems:RubyGemsFrontend
+```
+
+Alternatively, if you want to use setup.py:
 
 ```
 setup(
     ...
     entry_points = { 
         'upt.frontends': [
-            'myfrontend=upt_myfrontend.upt_myfrontend:MyFrontendParser',
+            'rubygems=upt_rubygems.upt_rubygems:RubyGemsFrontend',
         ]   
     },
     ...
 )
 ```
 
-Let us now look at your upt_myfrontend/upt_myfrontend.py file:
+Let us now look at the implementation of a frontend:
 
 ```
 ...
@@ -202,25 +211,55 @@ import upt
 class MyFrontEndPackage(upt.Package):
     pass
 
+
 class MyFrontendParser(upt.Parser):
- 16     name = 'myfrontend'
+        name = 'myfrontend'
+
         def parse(self, pkg_name):
             ...
             return MyFrontendPackage(pkg_name,
-                version=...,
-                homepage=...,
-                summary=...,
-                description=...,
-                download_urls=[url1, url2, ...],
+                version=...,  # A string, such as '1.2.3'
+                homepage=...,  # A string
+                summary=...,  # A string containing a short description
+                description=...,  # A string, containing a longer description
+                download_urls=[url1, url2, ...],  # A list of strings
+                # upt.PackageRequirement takes two arguments:
+                # - the name of the package
+                # - a version specifier, as defined in
+                # https://www.python.org/dev/peps/pep-0440/#version-specifiers
                 requirements={
-                    'build': [pkg1, ...],
-                    'run': [pkg2, ...],
-                    'test': [pkg3, ...]
-                })
+                    'build': [
+                         upt.PackageRequirement('build-dep', '>1.2'),
+                         ...
+                     ],
+                    'run': [
+                         upt.PackageRequirement('runtime-dep', ''),
+                         ...
+                     ],
+                    'test': [
+                         upt.PackageRequirement('test-dep', '<=2.3'),
+                         ...
+                     ]
+                },
+                # The license(s) used by this package, as instances of
+                # upt.License. The upt project provides a lot of licenses in
+                # the upt.licenses module. Use help(upt.licenses) to see the
+                # whole list.
+                # If you may not determine the nature of a licenses, you should
+                # return upt.UnknownLicense().
+                # The list of licenses may be empty.
+                licenses=[
+                    upt.licenses.BSDThreeClauseLicense(),
+                    upt.UnknownLicense(),
+                ]
+         )
 
 ```
 
-The most interesting method here is MyFrontendParser.parse. It must return a upt.Package object (you may define a subclass such as MyFrontendPackage if you wish). Only the package name and its version must be passed to the constructor, all other fields are optional.
+The most interesting method here is MyFrontendParser.parse. It must return a
+upt.Package object (you may define a subclass such as MyFrontendPackage if you
+wish). Only the package name and its version must be passed to the constructor,
+all other fields are optional.
 
 ### Adding a backend
 ```

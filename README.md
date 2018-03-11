@@ -262,16 +262,54 @@ wish). Only the package name and its version must be passed to the constructor,
 all other fields are optional.
 
 ### Adding a backend
+Your setup.cfg should use an entry point, like this:
+
+```
+[options.entry_points]
+# Taken from upt-openbsd
+upt.backends =
+    openbsd = upt_openbsd.upt_openbsd:OpenBSD
+```
+
+Alternatively, if you want to use setup.py:
+
 ```
 setup(
     ...
     entry_points = { 
         'upt.backends': [
-            'mybackend=upt_mybackend.upt_mybackend:MyBackend',
+            'openbsd=upt_openbsd.upt_openbsd:OpenBSD',
         ]   
     },
     ...
 )
+```
+
+Let us now look at the implementation of a backend:
+
+```
+...
+import upt
+...
+class MyBackend(upt.Backend):
+    # The name of the backend: this is what will be seen in the output of
+    # "upt --list-backends".
+    name = 'mybackend'
+
+    def create_package(self, upt_pkg, output=None):
+        # Parameters:
+        # - upt_pkg: an instance of upt_pkg. See the "Adding a frontend"
+        #            section for more info on its fields.
+        # - output: currently unused, will always be None.
+
+        # Do whatever you need to generate a valid "package definition" for
+        # your package manager. Note that "upt_pkg.frontend" contains the name
+        # of the frontend that was used: it should be helpful with the
+        # language-specific parts of your backend.
+        ...
+
+        # Currently, all backends write the "package definition" to stdout.
+        print(...)
 ```
 
 

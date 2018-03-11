@@ -282,6 +282,8 @@ The following frontends are supported:
   [CPAN](https://www.cpan.org/)
 - [upt-pypi](https://pypi.python.org/pypi/upt-pypi) a frontend for
   [PyPI](https://pypi.python.org/)
+- [upt-rubygems](https://pypi.python.org/pypi/upt-rubygems) a frontend for
+  [RubyGems](https://rubygems.org/)
 
 The following backends are supported:
 

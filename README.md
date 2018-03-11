@@ -332,6 +332,21 @@ The following backends are supported:
 
 Please tell us about your own frontends/backends!
 
+## Similar projects
+
+Here are some tools used to turn a package from a language-specific archive to
+a package suitable for a general purpose package manager. We can see that [GNU
+Guix](https://www.gnu.org/s/guix), [NetBSD](https://www.netbsd.org/) and
+[OpenBSD](https://www.openbsd.org) decided to write a single tool, thus having
+a unified CLI to access all upstream packages.
+
+|      | Debian       | Fedora   | Guix        | FreeBSD  | NetBSD  | OpenBSD |
+|------|--------------| ---------|-------------|----------|---------|---------|
+| CPAN | dh-make-perl | cpan2rpm | guix import | ?        | url2pkg | PortGen |
+| NPM  | npm2deb      | npm2rpm  | N/A         | ?        | url2pkg | ?       |
+| PyPI | pypi2deb     | pyp2rpm  | guix import | pytoport | url2pkg | PortGen | 
+| Ruby | gem2deb      | gem2rpm  | guix import | ?        | url2pkg | PortGen |
+
 
 ## License
 This project is distributed under the [3-Clause BSD

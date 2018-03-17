@@ -102,6 +102,10 @@ def create_parser():
                                help='Frontend to use')
     required_args.add_argument('-b', '--backend', required=True,
                                help='Backend to use')
+    parser_package.add_argument('-o', '--output',
+                                help='Output file/directory. Defaults to '
+                                     'stdout/current directory. This may be '
+                                     'ignored by the backend.')
     parser_package.add_argument('package', help='Name of the package')
 
     return parser
@@ -161,7 +165,7 @@ def main():
         try:
             upt_pkg = frontend.parse(args.package)
             upt_pkg.frontend = args.frontend
-            backend.create_package(upt_pkg)
+            backend.create_package(upt_pkg, output=args.output)
         except upt.exceptions.UnhandledFrontendError as e:
             print(e, file=sys.stderr)
             sys.exit(1)

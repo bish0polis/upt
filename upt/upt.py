@@ -2,11 +2,13 @@
 #
 # Licensed under the 3-clause BSD license. See the LICENSE file.
 import argparse
+import logging
 import sys
 
 import pkg_resources
 
 import upt.exceptions
+import upt.log
 
 
 class Backend(object):
@@ -102,10 +104,17 @@ def create_parser():
                                help='Frontend to use')
     required_args.add_argument('-b', '--backend', required=True,
                                help='Backend to use')
+    logger_group = parser_package.add_mutually_exclusive_group()
+    logger_group.add_argument('--debug', action='store_const',
+                              const=logging.DEBUG, dest='log_level',
+                              help='Print debug messages.')
     parser_package.add_argument('-o', '--output',
                                 help='Output file/directory. Defaults to '
                                      'stdout/current directory. This may be '
                                      'ignored by the backend.')
+    logger_group.add_argument('-q', '--quiet', action='store_const',
+                              const=logging.CRITICAL+1, dest='log_level',
+                              help='Suppress all logging output')
     parser_package.add_argument('package', help='Name of the package')
 
     return parser
@@ -162,9 +171,13 @@ def main():
             print(f'No backend named {args.backend}.')
             sys.exit(1)
 
+        logger = upt.log.create_logger(args.log_level)
+
         try:
+            upt.log.logger_set_formatter(logger, 'Frontend')
             upt_pkg = frontend.parse(args.package)
             upt_pkg.frontend = args.frontend
+            upt.log.logger_set_formatter(logger, 'Backend')
             backend.create_package(upt_pkg, output=args.output)
         except upt.exceptions.UnhandledFrontendError as e:
             print(e, file=sys.stderr)

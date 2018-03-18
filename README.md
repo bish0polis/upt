@@ -313,6 +313,21 @@ class MyBackend(upt.Backend):
 ```
 
 
+### Logging
+Whether you are writing a frontend or a backend, you can use a logger provided
+by upt by running:
+
+```
+import logging
+...
+logger = logging.getLogger('upt-backend')
+```
+
+See the [logging module
+documentation](https://docs.python.org/3/library/logging.html) for more info on
+how to use this logger.
+
+
 ## Known frontends and backends
 The following frontends are supported:
 

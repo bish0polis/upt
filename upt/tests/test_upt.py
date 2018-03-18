@@ -39,3 +39,8 @@ class TestCommandLine(unittest.TestCase):
         args = 'package -f pypi -b guix'.split()
         with self.assertRaises(SystemExit):
             self.parser.parse_args(args)
+
+    def test_package_exclusive_logging_options(self):
+        args = 'package -f pypi -b guix --debug --quiet requests'.split()
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(args)

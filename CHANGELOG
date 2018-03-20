@@ -7,6 +7,7 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 - upt package: Add the '--output' option
 - upt.log: New module that provides frontends/backends with a logger
+- upt-nix is now an officially supported backend
 
 ## [0.3] - 2018-03-13
 ### Added

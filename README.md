@@ -342,6 +342,8 @@ The following backends are supported:
 
 - [upt-guix](https://pypi.python.org/pypi/upt-guix) a backend for [GNU
   Guix](https://www.gnu.org/s/guix)
+- [upt-nix](https://pypi.python.org/pypi/upt-nix) a backend for
+  [Nix](https://nixos.org/nix/)
 - [upt-openbsd](https://pypi.python.org/pypi/upt-openbsd) a backend for
   [OpenBSD](https://www.openbsd.org)
 

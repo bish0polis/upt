@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.4] - 2018-03-20
 ### Added
 - upt package: Add the '--output' option
 - upt.log: New module that provides frontends/backends with a logger

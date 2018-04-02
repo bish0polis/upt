@@ -178,6 +178,18 @@ separate projects, so you should not send your patches to upt.
 
 ## Adding frontends or backends
 
+### New frontend/backend using cookiecutter
+
+You may create the whole directory structure for a new frontend/backend using
+[cookiecutter](https://github.com/audreyr/cookiecutter). This will also write
+some code and create a first git commit including everything you need to get
+started. Simply type:
+
+    $ cookiecutter https://framagit.org/upt/cookiecutter-upt
+
+And answer the questions prompted on the screen. The next two sections describe
+the structure of a frontend and a backend.
+
 ### Adding a frontend
 Your setup.cfg should use an entry point, like this:
 

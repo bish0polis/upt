@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+- upt.log: Add missing file
+
 ## [0.4] - 2018-03-20
 ### Added
 - upt package: Add the '--output' option

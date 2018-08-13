@@ -5,6 +5,7 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 - upt.log: Add missing file
+- README.md: Fix logger documentation
 
 ## [0.4] - 2018-03-20
 ### Added

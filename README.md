@@ -332,7 +332,7 @@ by upt by running:
 ```
 import logging
 ...
-logger = logging.getLogger('upt-backend')
+logger = logging.getLogger('upt')
 ```
 
 See the [logging module

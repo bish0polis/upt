@@ -363,6 +363,20 @@ Please tell us about your own frontends/backends!
 
 ## Similar projects
 
+### Generic tools
+[fpm](https://github.com/jordansissel/fpm) (Effing package management) is a tool
+quite similar to upt. It can turn packages from PyPI/RubyGems/etc. into packages
+for Debian/Fedora/etc. It features a unified command-line interface, a common
+behaviour for all target distributions, and a modular design.
+
+The main difference with upt is that it does not generate the "source" of a
+package, but rather an installable package: it will generate a deb file rather
+than a debian/ directory, an rpm file rather than a spec file, etc. See [this
+comment on the bug
+tracker](https://github.com/jordansissel/fpm/issues/1507#issuecomment-411390171)
+for more information.
+
+### Per-distribution tools
 Here are some tools used to turn a package from a language-specific archive to
 a package suitable for a general purpose package manager. We can see that [GNU
 Guix](https://www.gnu.org/s/guix), [NetBSD](https://www.netbsd.org/) and

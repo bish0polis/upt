@@ -14,6 +14,7 @@ class TestLicenses(unittest.TestCase):
         license = TestLicense()
         self.assertFalse(license.is_osi_approved())
         self.assertFalse(license.is_gpl_compatible())
+        self.assertFalse(license.is_dfsg_compatible())
 
     def test_osi_approved_license(self):
         class TestLicense(licenses.OSIApprovedLicense):

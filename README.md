@@ -352,6 +352,10 @@ The following frontends are supported:
 
 The following backends are supported:
 
+- [upt-fedora](https://pypi.python.org/pypi/upt-fedora) a backend for
+  [Fedora](https://getfedora.org/)
+- [upt-freebsd](https://pypi.python.org/pypi/upt-freebsd) a backend for
+  [FreeBSD](https://www.freebsd.org/)
 - [upt-guix](https://pypi.python.org/pypi/upt-guix) a backend for [GNU
   Guix](https://www.gnu.org/s/guix)
 - [upt-nix](https://pypi.python.org/pypi/upt-nix) a backend for

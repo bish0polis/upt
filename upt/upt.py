@@ -2,11 +2,15 @@
 #
 # Licensed under the 3-clause BSD license. See the LICENSE file.
 import argparse
+from enum import Enum
 import logging
+import os
+import urllib.request
 import sys
 
 import pkg_resources
 
+import upt.checksum
 import upt.exceptions
 import upt.log
 
@@ -18,6 +22,79 @@ class Backend(object):
 class Frontend(object):
     """Base class for all upt Frontends."""
     pass
+
+
+class ArchiveType(Enum):
+    SOURCE_TARGZ = 1
+
+
+class ArchiveUnavailable(Exception):
+    def __str__(self):
+        return 'No such archive could be found'
+
+
+class Archive(object):
+    '''An archive file.
+
+    This can be a source tarball, a Python wheel, a Ruby gem, a binary, etc.
+    '''
+    def __init__(self, url, archive_type=ArchiveType.SOURCE_TARGZ, size=0,
+                 md5=None, sha256=None, rmd160=None):
+        self.url = url
+        self.archive_type = archive_type
+        self._size = size
+        self._filepath = None
+        self._hashes = {}
+        if md5 is not None:
+            self.md5 = md5
+        if sha256 is not None:
+            self.sha256 = sha256
+        if rmd160 is not None:
+            self.rmd160 = rmd160
+
+    @property
+    def filepath(self):
+        if self._filepath is None:
+            self._filepath, _ = urllib.request.urlretrieve(self.url)
+        return self._filepath
+
+    @property
+    def size(self):
+        if self._size == 0:
+            self._size = os.stat(self.filepath).st_size
+        return self._size
+
+    def _checksum(self, hash_name):
+        try:
+            return self._hashes[hash_name]
+        except KeyError:
+            value = upt.checksum.compute_checksum(self.filepath, hash_name)
+            self._hashes[hash_name] = value
+            return value
+
+    @property
+    def md5(self):
+        return self._checksum('md5')
+
+    @md5.setter
+    def md5(self, value):
+        self._hashes['md5'] = value
+
+    @property
+    def rmd160(self):
+        return self._checksum('rmd160')
+
+    @rmd160.setter
+    def rmd160(self, value):
+        self._hashes['rmd160'] = value
+
+    @property
+    def sha256(self):
+        return self._checksum('sha256')
+
+    @sha256.setter
+    def sha256(self, value):
+        self._hashes['sha256'] = value
 
 
 class PackageRequirement(object):
@@ -55,7 +132,7 @@ class Package(object):
     - homepage: a string, representing the official homepage of the package
     - summary: a short summary of the package's purpose
     - description: a long description of the package's purpose
-    - download_urls: a list of strings, representing possible download URLs
+    - download_urls: deprecated
     - requirement: a dict with 3 keys:
         - 'build': the build dependencies of the package;
         - 'run': the runtime dependencies of the package;
@@ -70,6 +147,7 @@ class Package(object):
         self.homepage = kwargs.get('homepage', '')
         self.summary = kwargs.get('summary', '')
         self.description = kwargs.get('description', '')
+        # TODO: Remove download urls.
         self.download_urls = kwargs.get('download_urls', [])
         # Software requirements, as instances of PackageRequirement: {
         #     'build': [pkg1, ...],
@@ -78,9 +156,22 @@ class Package(object):
         # }
         self.requirements = kwargs.get('requirements', {})
         self.licenses = kwargs.get('licenses', [])
+        self.archives = kwargs.get('archives', [])
 
     def __str__(self):
         return f'{self.name}@{self.version}'
+
+    def get_archive(self, archive_type=ArchiveType.SOURCE_TARGZ):
+        for archive in self.archives:
+            if archive.archive_type == archive_type:
+                return archive
+        else:
+            raise ArchiveUnavailable()
+
+    def _clean(self):
+        for archive in self.archives:
+            if archive._filepath is not None:
+                os.remove(archive._filepath)
 
 
 def create_parser():
@@ -185,3 +276,5 @@ def main():
         except upt.exceptions.InvalidPackageNameError as e:
             print(e, file=sys.stderr)
             sys.exit(1)
+        finally:
+            upt_pkg._clean()

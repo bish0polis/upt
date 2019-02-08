@@ -263,6 +263,10 @@ class MyFrontendParser(upt.Parser):
                 licenses=[
                     upt.licenses.BSDThreeClauseLicense(),
                     upt.UnknownLicense(),
+                ],
+                archives=[
+                    upt.Archive('http://example.com/foo.tar.gz', size=1234,
+                                md5='md5', rmd160='rmd160', sha256='sha256')
                 ]
          )
 

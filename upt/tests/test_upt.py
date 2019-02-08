@@ -17,6 +17,38 @@ class TestPackage(unittest.TestCase):
         pkg = upt.Package('foo', '4.2')
         self.assertNotEqual(str(pkg), 'foo@42')
 
+    def test_get_archive_none_available(self):
+        error = 'No such archive could be found'
+        pkg = upt.Package('foo', '4.2', archives=[])
+        with self.assertRaisesRegex(upt.ArchiveUnavailable, error):
+            pkg.get_archive()
+
+    def test_get_archive(self):
+        archives = [
+            upt.Archive('url')
+        ]
+        pkg = upt.Package('foo', '4.2', archives=archives)
+        self.assertEqual(pkg.get_archive(), archives[0])
+
+    @mock.patch('os.remove')
+    def test_clean_archive_downloaded(self, remove_fn):
+        archives = [
+            upt.Archive('url')
+        ]
+        archives[0]._filepath = '/fake/path'  # Archive 'downloaded'
+        pkg = upt.Package('foo', '4.2', archives=archives)
+        pkg._clean()
+        remove_fn.assert_called_once_with('/fake/path')
+
+    @mock.patch('os.remove')
+    def test_clean_archive_not_downloaded(self, remove_fn):
+        archives = [
+            upt.Archive('url')
+        ]
+        pkg = upt.Package('foo', '4.2', archives=archives)
+        pkg._clean()
+        remove_fn.assert_not_called()
+
 
 class TestPackageRequirement(unittest.TestCase):
     def test_str_with_specifier(self):
@@ -206,3 +238,41 @@ class TestCommandLine(unittest.TestCase):
         with self.assertRaises(SystemExit) as exit:
             upt.upt.main()
         self.assertEqual(exit.exception.code, 1)
+
+
+class TestArchive(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    @mock.patch('os.stat', return_value=mock.Mock(st_size=42))
+    def test_size(self, stat_fn):
+        archive = upt.Archive('url', size=0)
+        archive._filepath = '/fake/path'
+        self.assertEqual(archive.size, 42)
+
+        archive = upt.Archive('url', size=12)
+        archive._filepath = '/fake/path'
+        self.assertEqual(archive.size, 12)
+
+    @mock.patch('urllib.request.urlretrieve', return_value=('/path', None))
+    def test_filepath(self, urlretrieve_fn):
+        archive = upt.Archive('url')
+        self.assertEqual(archive.filepath, '/path')
+
+    @mock.patch('upt.checksum.compute_checksum', return_value='hash-output')
+    @mock.patch('urllib.request.urlretrieve', return_value=('/path', None))
+    def test_checksum(self, urlretrieve_fn, compute_checksum_fn):
+        archive = upt.Archive('url')
+        self.assertEqual(archive._checksum('fake-hash'), 'hash-output')
+        self.assertEqual(archive._checksum('fake-hash'), 'hash-output')
+        urlretrieve_fn.assert_called_once()
+        compute_checksum_fn.assert_called_once()
+
+    @mock.patch('upt.checksum.compute_checksum', return_value='hash-output')
+    def test_checksums_provided(self, compute_checksum_fn):
+        archive = upt.Archive('url', md5='md5', rmd160='rmd160',
+                              sha256='sha256')
+        self.assertEqual(archive.md5, 'md5')
+        self.assertEqual(archive.rmd160, 'rmd160')
+        self.assertEqual(archive.sha256, 'sha256')
+        compute_checksum_fn.assert_not_called()

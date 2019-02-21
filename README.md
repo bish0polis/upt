@@ -345,7 +345,7 @@ how to use this logger.
 
 
 ## Known frontends and backends
-The following frontends are supported:
+### Supported frontends
 
 - [upt-cpan](https://pypi.python.org/pypi/upt-cpan) a frontend for
   [CPAN](https://www.cpan.org/)
@@ -354,7 +354,9 @@ The following frontends are supported:
 - [upt-rubygems](https://pypi.python.org/pypi/upt-rubygems) a frontend for
   [RubyGems](https://rubygems.org/)
 
-The following backends are supported:
+Please tell us about your frontends!
+
+### Supported backends
 
 - [upt-fedora](https://pypi.python.org/pypi/upt-fedora) a backend for
   [Fedora](https://getfedora.org/)
@@ -367,7 +369,18 @@ The following backends are supported:
 - [upt-openbsd](https://pypi.python.org/pypi/upt-openbsd) a backend for
   [OpenBSD](https://www.openbsd.org)
 
-Please tell us about your own frontends/backends!
+Please tell us about your backends!
+
+### Compatibility
+
+|             | upt-cpan | upt-pypi | upt-rubygems |
+|-------------|----------|----------|--------------|
+| upt-fedora  |    OK    |    OK    |      OK      |
+| upt-freebsd |    OK    |    OK    |      KO      |
+| upt-guix    |    OK    |    OK    |      OK      |
+| upt-nix     |    OK    |    OK    |      KO      |
+| upt-openbsd |    OK    |    OK    |      OK      |
+
 
 ## Similar projects
 

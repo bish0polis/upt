@@ -265,6 +265,7 @@ def main():
         logger = upt.log.create_logger(args.log_level)
 
         try:
+            upt_pkg = None
             upt.log.logger_set_formatter(logger, 'Frontend')
             upt_pkg = frontend.parse(args.package)
             upt_pkg.frontend = args.frontend
@@ -277,4 +278,6 @@ def main():
             print(e, file=sys.stderr)
             sys.exit(1)
         finally:
-            upt_pkg._clean()
+            if upt_pkg is not None:
+                # We always want to clean up after ourselves.
+                upt_pkg._clean()

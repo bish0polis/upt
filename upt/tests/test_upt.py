@@ -227,13 +227,13 @@ class TestCommandLine(unittest.TestCase):
         cmdline = 'package -f valid-frontend -b valid-backend pkgname'
         sys.argv.extend(cmdline.split())
 
-        def backend_fail(*args, **kwargs):
+        def frontend_fail(*args, **kwargs):
             raise upt.exceptions.InvalidPackageNameError('valid-backend',
                                                          'pkgname')
-        fake_backend = mock.Mock()
-        fake_backend().create_package.side_effect = backend_fail
-        m_backends.return_value = {
-            'valid-backend': fake_backend
+        fake_frontend = mock.Mock()
+        fake_frontend().parse.side_effect = frontend_fail
+        m_frontends.return_value = {
+            'valid-frontend': fake_frontend
         }
         with self.assertRaises(SystemExit) as exit:
             upt.upt.main()

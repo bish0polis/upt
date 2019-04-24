@@ -7,6 +7,7 @@ import logging
 import os
 import urllib.request
 import sys
+import tempfile
 
 import pkg_resources
 
@@ -43,7 +44,8 @@ class Archive(object):
         self.url = url
         self.archive_type = archive_type
         self._size = size
-        self._filepath = None
+        self._filepath = None  # Absolute path on the local filesystem
+        self._filename = None  # Filename on the local filesystem
         self._hashes = {}
         if md5 is not None:
             self.md5 = md5
@@ -55,8 +57,15 @@ class Archive(object):
     @property
     def filepath(self):
         if self._filepath is None:
-            self._filepath, _ = urllib.request.urlretrieve(self.url)
+            self._filepath = os.path.join(tempfile.gettempdir(), self.filename)
+            urllib.request.urlretrieve(self.url, filename=self._filepath)
         return self._filepath
+
+    @property
+    def filename(self):
+        if self._filename is None:
+            self._filename = os.path.basename(self.url)
+        return self._filename
 
     @property
     def size(self):

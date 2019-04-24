@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- upt.Archive: add a "filename" attribute
+
 ## [0.6] - 2019-02-08
 ### Added
 - upt.Archive: a representation of archive files, such as source tarballs

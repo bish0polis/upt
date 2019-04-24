@@ -254,15 +254,23 @@ class TestArchive(unittest.TestCase):
         archive._filepath = '/fake/path'
         self.assertEqual(archive.size, 12)
 
-    @mock.patch('urllib.request.urlretrieve', return_value=('/path', None))
-    def test_filepath(self, urlretrieve_fn):
-        archive = upt.Archive('url')
-        self.assertEqual(archive.filepath, '/path')
+    def test_filename(self):
+        archive = upt.Archive('http://example.com/source.tar.gz')
+        self.assertEqual(archive.filename, 'source.tar.gz')
+
+    @mock.patch('urllib.request.urlretrieve',
+                return_value=('/tmpdir/source.tar.gz', None))
+    @mock.patch('tempfile.gettempdir', return_value='/tmpdir')
+    def test_filepath(self, gettempdir_fn, urlretrieve_fn):
+        archive = upt.Archive('http://example.com/source.tar.gz')
+        self.assertEqual(archive.filepath, '/tmpdir/source.tar.gz')
 
     @mock.patch('upt.checksum.compute_checksum', return_value='hash-output')
-    @mock.patch('urllib.request.urlretrieve', return_value=('/path', None))
-    def test_checksum(self, urlretrieve_fn, compute_checksum_fn):
-        archive = upt.Archive('url')
+    @mock.patch('urllib.request.urlretrieve',
+                return_value=('/tmpdir/source.tar.gz', None))
+    @mock.patch('tempfile.gettempdir', return_value='/tmpdir')
+    def test_checksum(self, gettmpdir_fn, urlretrieve_fn, compute_checksum_fn):
+        archive = upt.Archive('http://example.com/source.tar.gz')
         self.assertEqual(archive._checksum('fake-hash'), 'hash-output')
         self.assertEqual(archive._checksum('fake-hash'), 'hash-output')
         urlretrieve_fn.assert_called_once()

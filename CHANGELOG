@@ -8,6 +8,9 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - upt.Archive: add a "filename" attribute
 - upt.Archive: add support for sha256 in base64 notation
 
+### Removed
+- upt.Package: remove the download_urls attribute
+
 ## [0.6] - 2019-02-08
 ### Added
 - upt.Archive: a representation of archive files, such as source tarballs

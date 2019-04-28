@@ -235,7 +235,6 @@ class MyFrontendParser(upt.Parser):
                 homepage=...,  # A string
                 summary=...,  # A string containing a short description
                 description=...,  # A string, containing a longer description
-                download_urls=[url1, url2, ...],  # A list of strings
                 # upt.PackageRequirement takes two arguments:
                 # - the name of the package
                 # - a version specifier, as defined in

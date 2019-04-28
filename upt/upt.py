@@ -151,7 +151,6 @@ class Package(object):
     - homepage: a string, representing the official homepage of the package
     - summary: a short summary of the package's purpose
     - description: a long description of the package's purpose
-    - download_urls: deprecated
     - requirement: a dict with 3 keys:
         - 'build': the build dependencies of the package;
         - 'run': the runtime dependencies of the package;
@@ -166,8 +165,6 @@ class Package(object):
         self.homepage = kwargs.get('homepage', '')
         self.summary = kwargs.get('summary', '')
         self.description = kwargs.get('description', '')
-        # TODO: Remove download urls.
-        self.download_urls = kwargs.get('download_urls', [])
         # Software requirements, as instances of PackageRequirement: {
         #     'build': [pkg1, ...],
         #     'run': [pkg2, ...],

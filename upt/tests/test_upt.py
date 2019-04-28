@@ -279,8 +279,9 @@ class TestArchive(unittest.TestCase):
     @mock.patch('upt.checksum.compute_checksum', return_value='hash-output')
     def test_checksums_provided(self, compute_checksum_fn):
         archive = upt.Archive('url', md5='md5', rmd160='rmd160',
-                              sha256='sha256')
+                              sha256='sha256', sha256_base64='sha256_base64')
         self.assertEqual(archive.md5, 'md5')
         self.assertEqual(archive.rmd160, 'rmd160')
         self.assertEqual(archive.sha256, 'sha256')
+        self.assertEqual(archive.sha256_base64, 'sha256_base64')
         compute_checksum_fn.assert_not_called()

@@ -1,6 +1,8 @@
 # Copyright 2018      Cyril Roelandt
 #
 # Licensed under the 3-clause BSD license. See the LICENSE file.
+import base64
+import binascii
 import hashlib
 
 
@@ -40,11 +42,17 @@ def _compute_sha256_checksum(filepath):
     return _compute_checksum(hashlib.sha256, filepath)
 
 
+def _compute_sha256_base64_checksum(filepath):
+    sha256 = _compute_sha256_checksum(filepath)
+    return base64.b64encode(binascii.a2b_hex(sha256)).decode('ascii')
+
+
 def compute_checksum(filepath, hash_name):
     hash_functions = {
         'md5': _compute_md5_checksum,
         'rmd160': _compute_rmd160_checksum,
         'sha256': _compute_sha256_checksum,
+        'sha256_base64': _compute_sha256_base64_checksum,
     }
     try:
         return hash_functions[hash_name](filepath)

@@ -6,6 +6,7 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Added
 - upt.Archive: add a "filename" attribute
+- upt.Archive: add support for sha256 in base64 notation
 
 ## [0.6] - 2019-02-08
 ### Added

@@ -152,6 +152,7 @@ class Package(object):
     - summary: a short summary of the package's purpose
     - description: a long description of the package's purpose
     - requirement: a dict with 3 keys:
+        - 'config': the config dependencies of the package;
         - 'build': the build dependencies of the package;
         - 'run': the runtime dependencies of the package;
         - 'test': the test dependencies of the package.

@@ -240,6 +240,10 @@ class MyFrontendParser(upt.Parser):
                 # - a version specifier, as defined in
                 # https://www.python.org/dev/peps/pep-0440/#version-specifiers
                 requirements={
+                    'config': [
+                         upt.PackageRequirement('config-dep', '==1.4'),
+                         ...
+                     ],
                     'build': [
                          upt.PackageRequirement('build-dep', '>1.2'),
                          ...

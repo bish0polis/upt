@@ -208,11 +208,15 @@ def create_parser(frontends, backends):
     parser_package = subparsers.add_parser('package',
                                            help='Package a piece of software')
     required_args = parser_package.add_argument_group('Required arguments')
-    required_args.add_argument('-f', '--frontend', required=True,
+    required_args.add_argument('-f', '--frontend',
+                               required=len(frontends) > 1,
                                choices=frontends,
+                               default=frontends[0] if frontends else None,
                                help='Frontend to use')
-    required_args.add_argument('-b', '--backend', required=True,
+    required_args.add_argument('-b', '--backend',
+                               required=len(backends) > 1,
                                choices=backends,
+                               default=backends[0] if backends else None,
                                help='Backend to use')
     logger_group = parser_package.add_mutually_exclusive_group()
     logger_group.add_argument('--debug', action='store_const',

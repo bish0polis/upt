@@ -110,33 +110,45 @@ class TestUtils(unittest.TestCase):
 
 
 class TestParser(unittest.TestCase):
-    def setUp(self):
-        self.parser = upt.upt.create_parser(['pypi'], ['guix'])
+    def test_package_single_frontend(self):
+        parser = upt.upt.create_parser(['pypi'], ['guix', 'nix'])
+        args = 'package -b guix requests'.split()
+        parser.parse_args(args)
+
+    def test_package_single_backend(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix'])
+        args = 'package -f pypi requests'.split()
+        parser.parse_args(args)
 
     def test_package_missing_frontend(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package -b guix requests'.split()
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(args)
+            parser.parse_args(args)
 
     def test_package_missing_backend(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package -f pypi requests'.split()
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(args)
+            parser.parse_args(args)
 
     def test_package_missing_frontend_and_backend(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package requests'.split()
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(args)
+            parser.parse_args(args)
 
     def test_package_missing_package(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package -f pypi -b guix'.split()
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(args)
+            parser.parse_args(args)
 
     def test_package_exclusive_logging_options(self):
+        parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package -f pypi -b guix --debug --quiet requests'.split()
         with self.assertRaises(SystemExit):
-            self.parser.parse_args(args)
+            parser.parse_args(args)
 
 
 class TestCommandLine(unittest.TestCase):

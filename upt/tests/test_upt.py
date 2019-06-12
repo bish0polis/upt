@@ -111,7 +111,7 @@ class TestUtils(unittest.TestCase):
 
 class TestParser(unittest.TestCase):
     def setUp(self):
-        self.parser = upt.upt.create_parser()
+        self.parser = upt.upt.create_parser(['pypi'], ['guix'])
 
     def test_package_missing_frontend(self):
         args = 'package -b guix requests'.split()
@@ -186,24 +186,43 @@ class TestCommandLine(unittest.TestCase):
     @mock.patch('upt.upt._get_installed_frontends', return_value={})
     @mock.patch('upt.upt._get_installed_backends',
                 return_value={'valid': mock.Mock()})
-    def test_package_invalid_frontend(self, m_backends, m_frontends):
-        sys.argv.extend('package -f invalid -b valid pkgname'.split())
-        with self.assertRaises(SystemExit) as exit:
+    def test_package_no_frontends(self, m_backends, m_frontends):
+        sys.argv.extend('package'.split())
+        with self.assertRaises(SystemExit):
             upt.upt.main()
-        self.assertEqual(exit.exception.code, 1)
 
     @mock.patch('upt.upt._get_installed_frontends',
                 return_value={'valid': mock.Mock()})
     @mock.patch('upt.upt._get_installed_backends', return_value={})
-    def test_package_invalid_backend(self, m_backends, m_frontends):
-        sys.argv.extend('package -f valid -b invalid pkgname'.split())
-        with self.assertRaises(SystemExit) as exit:
+    def test_package_no_backends(self, m_backends, m_frontends):
+        sys.argv.extend('package'.split())
+        with self.assertRaises(SystemExit):
             upt.upt.main()
-        self.assertEqual(exit.exception.code, 1)
 
     @mock.patch('upt.upt._get_installed_frontends',
                 return_value={'valid-frontend': mock.Mock()})
-    @mock.patch('upt.upt._get_installed_backends')
+    @mock.patch('upt.upt._get_installed_backends',
+                return_value={'valid-backend': mock.Mock()})
+    def test_package_invalid_frontend(self, m_backends, m_frontends):
+        sys.argv.extend('package -f invalid -b valid-backend pkgname'.split())
+        with self.assertRaises(SystemExit) as exit:
+            upt.upt.main()
+        self.assertEqual(exit.exception.code, 2)
+
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends',
+                return_value={'valid-backend': mock.Mock()})
+    def test_package_invalid_backend(self, m_backends, m_frontends):
+        sys.argv.extend('package -f valid-frontend -b invalid pkgname'.split())
+        with self.assertRaises(SystemExit) as exit:
+            upt.upt.main()
+        self.assertEqual(exit.exception.code, 2)
+
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends',
+                return_value={'valid-backend': mock.Mock()})
     def test_package_unhandled_frontend(self, m_backends, m_frontends):
         cmdline = 'package -f valid-frontend -b valid-backend pkgname'
         sys.argv.extend(cmdline.split())
@@ -222,7 +241,8 @@ class TestCommandLine(unittest.TestCase):
 
     @mock.patch('upt.upt._get_installed_frontends',
                 return_value={'valid-frontend': mock.Mock()})
-    @mock.patch('upt.upt._get_installed_backends')
+    @mock.patch('upt.upt._get_installed_backends',
+                return_value={'valid-backend': mock.Mock()})
     def test_package_invalid_pkgname(self, m_backends, m_frontends):
         cmdline = 'package -f valid-frontend -b valid-backend pkgname'
         sys.argv.extend(cmdline.split())

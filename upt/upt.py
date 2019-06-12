@@ -191,7 +191,7 @@ class Package(object):
                 os.remove(archive._filepath)
 
 
-def create_parser():
+def create_parser(frontends, backends):
     parser = argparse.ArgumentParser(prog='upt')
 
     subparsers = parser.add_subparsers(title='Commands', dest='cmd')
@@ -209,8 +209,10 @@ def create_parser():
                                            help='Package a piece of software')
     required_args = parser_package.add_argument_group('Required arguments')
     required_args.add_argument('-f', '--frontend', required=True,
+                               choices=frontends,
                                help='Frontend to use')
     required_args.add_argument('-b', '--backend', required=True,
+                               choices=backends,
                                help='Backend to use')
     logger_group = parser_package.add_mutually_exclusive_group()
     logger_group.add_argument('--debug', action='store_const',
@@ -246,39 +248,44 @@ def _get_installed_backends():
 
 
 def main():
-    parser = create_parser()
+    frontends = _get_installed_frontends()
+    backends = _get_installed_backends()
+    parser = create_parser(list(frontends.keys()), list(backends.keys()))
+
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
 
+    # We need to handle this here, because if we let the parser run in an
+    # environment without frontends/backends, it will return a useless error
+    # message, such as "choose a frontend in {}".
+    if sys.argv[1] == 'package':
+        if not frontends:
+            sys.exit('You need to install at least one frontend, for instance '
+                     'upt-cpan, upt-pypi or upt-rubygems')
+
+        if not backends:
+            sys.exit('You need to install at least one backend, for instance '
+                     'upt-fedora, upt-freebsd, upt-guix, upt-nix or '
+                     'upt-openbsd')
+
     args = parser.parse_args()
 
     if args.cmd == 'list-backends':
-        for backend in _get_installed_backends().keys():
+        for backend in backends.keys():
             print(backend)
         sys.exit(0)
 
     if args.cmd == 'list-frontends':
-        for frontend in _get_installed_frontends().keys():
+        for frontend in frontends.keys():
             print(frontend)
         sys.exit(0)
 
     if args.cmd == 'package':
-        frontends = _get_installed_frontends()
-        backends = _get_installed_backends()
-
-        try:
-            frontend = frontends[args.frontend]()
-        except KeyError:
-            print(f'No frontend named {args.frontend}.')
-            sys.exit(1)
-
-        try:
-            backend = backends[args.backend]()
-        except KeyError:
-            print(f'No backend named {args.backend}.')
-            sys.exit(1)
-
+        # There will not be a KeyError here, since argparse will catch "wrong"
+        # values for us.
+        frontend = frontends[args.frontend]()
+        backend = backends[args.backend]()
         logger = upt.log.create_logger(args.log_level)
 
         try:

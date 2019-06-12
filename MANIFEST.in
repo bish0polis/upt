@@ -1,4 +1,0 @@
-include CHANGELOG
-include LICENSE
-include README.md
-include tox.ini

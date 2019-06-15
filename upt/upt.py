@@ -27,6 +27,7 @@ class Frontend(object):
 
 class ArchiveType(Enum):
     SOURCE_TARGZ = 1
+    RUBYGEM = 2
 
 
 class ArchiveUnavailable(Exception):

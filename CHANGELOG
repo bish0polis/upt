@@ -7,6 +7,7 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 - cli: --frontend/--backend is optional when there is only one
   frontend/backend available
+- ArchiveType: add type "RUBYGEM"
 
 ## [0.7] - 2019-04-28
 ### Added

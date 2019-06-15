@@ -30,6 +30,15 @@ class TestPackage(unittest.TestCase):
         pkg = upt.Package('foo', '4.2', archives=archives)
         self.assertEqual(pkg.get_archive(), archives[0])
 
+    def test_get_archive_with_argument(self):
+        archives = [
+            upt.Archive('url', archive_type=upt.ArchiveType.RUBYGEM)
+        ]
+        pkg = upt.Package('foo', '4.2', archives=archives)
+        with self.assertRaises(upt.ArchiveUnavailable):
+            pkg.get_archive()
+        self.assertEqual(pkg.get_archive(upt.ArchiveType.RUBYGEM), archives[0])
+
     @mock.patch('os.remove')
     def test_clean_archive_downloaded(self, remove_fn):
         archives = [

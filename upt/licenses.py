@@ -160,6 +160,11 @@ class CC0LicenceOneDotZero(GPLCompatibleLicense):
     spdx_identifier = 'CC0-1.0'
 
 
+class CCBYSAFourDotZero(DFSGCompatibleLicense, GPLCompatibleLicense):
+    name = 'Creative Commons Attribution Share Alike 4.0 International'
+    spdx_identifier = 'CC-BY-SA-4.0'
+
+
 class CeCILLBLicense(License):
     name = 'CeCILL-B'
     spdx_identifier = 'CECILL-B'
@@ -168,6 +173,11 @@ class CeCILLBLicense(License):
 class CeCILLCLicense(License):
     name = 'CeCILL-C'
     spdx_identifier = 'CECILL-C'
+
+
+class CeCILLTwoDotZero(GPLCompatibleLicense):
+    name = 'CeCILL License 2.0'
+    spdx_identifier = 'CECILL-2.0'
 
 
 class CeCILLTwoDotOne(OSIApprovedLicense, GPLCompatibleLicense):
@@ -650,6 +660,11 @@ class W3CLicense(OSIApprovedLicense, GPLCompatibleLicense):
     spdx_identifier = 'W3C'
 
 
+class WTFPLicense(DFSGCompatibleLicense, GPLCompatibleLicense):
+    name = 'Do What The F*ck You Want To Public License'
+    spdx_identifier = 'WTFPL'
+
+
 class WxWindowsLibraryLicense(OSIApprovedLicense, GPLCompatibleLicense):
     name = 'wxWindows Library License'
     spdx_identifier = 'wxWindows'
@@ -663,6 +678,11 @@ class XNetLicense(OSIApprovedLicense):
 class ZopePublicLicenseTwoDotZero(OSIApprovedLicense, GPLCompatibleLicense):
     name = 'Zope Public License 2.0'
     spdx_identifier = 'ZPL-2.0'
+
+
+class ZopePublicLicenseTwoDotOne(GPLCompatibleLicense):
+    name = 'Zope Public License 2.1'
+    spdx_identifier = 'ZPL-2.1'
 
 
 class ZlibLicense(DFSGCompatibleLicense,

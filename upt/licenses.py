@@ -699,7 +699,7 @@ class ZlibLibpngLicense(DFSGCompatibleLicense,
     spdx_identifier = 'zlib-acknowledgement'
 
 
-def _get_license_by_spdx_identifier(spdx_id):
+def get_license_by_spdx_identifier(spdx_id):
     """Return a License object corresponding to the given spdx id."""
     # Keys are spdx identifiers.
     # Values are License classes.
@@ -739,4 +739,4 @@ def guess_from_file(license_file, min_confidence=95):
             return UnknownLicense()
         if match.confidence < min_confidence:
             return UnknownLicense()
-        return _get_license_by_spdx_identifier(match.license.id)
+        return get_license_by_spdx_identifier(match.license.id)

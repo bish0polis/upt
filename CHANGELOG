@@ -6,6 +6,7 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Added
 - licenses: Add new licenses
+- upt.licenses: Expose get_license_by_spdx_identifier
 
 ## [0.8] - 2019-06-15
 ### Changed

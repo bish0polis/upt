@@ -129,6 +129,11 @@ class TestParser(unittest.TestCase):
         args = 'package -f pypi requests'.split()
         parser.parse_args(args)
 
+    def test_package_recursive(self):
+        parser = upt.upt.create_parser(['pypi'], ['guix'])
+        args = 'package -r requests'.split()
+        parser.parse_args(args)
+
     def test_package_missing_frontend(self):
         parser = upt.upt.create_parser(['cpan', 'pypi'], ['guix', 'nix'])
         args = 'package -b guix requests'.split()
@@ -326,3 +331,70 @@ class TestArchive(unittest.TestCase):
         self.assertEqual(archive.sha256, 'sha256')
         self.assertEqual(archive.sha256_base64, 'sha256_base64')
         compute_checksum_fn.assert_not_called()
+
+
+class TestRecursion(unittest.TestCase):
+    def setUp(self):
+        self.package = upt.Package('foo', '42')
+        self.frontend = mock.Mock()
+        self.frontend.parse.return_value = self.package
+        self.backend = mock.Mock()
+
+    def test_no_dependencies(self):
+        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        self.backend.create_package.assert_called()
+        self.backend.needs_requirement.assert_not_called()
+
+    def test_dependencies(self):
+        self.package.requirements = {
+            'run': [upt.PackageRequirement('bar')]
+        }
+        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        self.backend.create_package.assert_called()
+        self.backend.needs_requirement.assert_called()
+
+    def test_circular_dependency(self):
+        self.package.requirements = {
+            'run': [upt.PackageRequirement('foo')]
+        }
+        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        self.backend.create_package.assert_called_once()
+        self.backend.needs_requirement.assert_not_called()
+
+    def test_recursion_disabled(self):
+        self.package.requirements = {
+            'run': [upt.PackageRequirement('bar')]
+        }
+        upt.upt.package('foo', self.frontend, self.backend, None, False, [])
+        self.backend.create_package.assert_called_once()
+        self.backend.needs_requirement.assert_not_called()
+
+
+class TestBackend(unittest.TestCase):
+    def setUp(self):
+        self.backend = upt.upt.Backend()
+
+    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=[])
+    def test_needs_requirement_not_packaged(self, mock_pkg):
+        requirement = upt.PackageRequirement('foo')
+        self.assertTrue(self.backend.needs_requirement(requirement, None))
+
+    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
+    def test_needs_requirement_incompatible_version(self, mock_pkg):
+        requirement = upt.PackageRequirement('foo', '>2')
+        self.assertTrue(self.backend.needs_requirement(requirement, None))
+
+    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
+    def test_needs_requirement_compatible_version(self, mock_pkg):
+        requirement = upt.PackageRequirement('foo', '>0.5')
+        self.assertFalse(self.backend.needs_requirement(requirement, None))
+
+    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
+    def test_needs_requirement_no_specifier(self, mock_pkg):
+        requirement = upt.PackageRequirement('foo')
+        self.assertFalse(self.backend.needs_requirement(requirement, None))
+
+    def test_package_versions_not_overriden(self):
+        requirement = upt.PackageRequirement('foo')
+        with self.assertRaises(NotImplementedError):
+            self.backend.needs_requirement(requirement, None)

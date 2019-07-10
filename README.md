@@ -65,6 +65,10 @@ Or, using shorter options:
 
     $ upt package -f pypi -b guix requests
 
+You may also want to recursively package all of its requirements:
+
+    $ upt package -f pypi -b guix -r requests
+
 The package definition will be written to the standard output.
 
 
@@ -315,6 +319,19 @@ class MyBackend(upt.Backend):
     # The name of the backend: this is what will be seen in the output of
     # "upt --list-backends".
     name = 'mybackend'
+
+    # Should you wish to use the "--recursive" flag, in order to recursively
+    # package all dependencies of your package, you must define the following
+    # method, which returns a list of all versions of a given package currently
+    # packaged in your backend.
+    def package_versions(self, package_name):
+        """Return a list of available versions of PACKAGE_NAME"""
+        raise NotImplementedError
+
+    # Alternatively, you could redefine the following method to have complete
+    # control over the decision to package (or not package) the given
+    # requirement:
+    # def needs_requirement(self, req, phase):
 
     def create_package(self, upt_pkg, output=None):
         # Parameters:

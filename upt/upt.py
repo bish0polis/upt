@@ -9,6 +9,7 @@ import urllib.request
 import sys
 import tempfile
 
+from packaging.specifiers import SpecifierSet
 import pkg_resources
 
 import upt.checksum
@@ -17,7 +18,33 @@ import upt.log
 
 
 class Backend(object):
-    pass
+    def package_versions(self, package_name):
+        """Return a list of available versions of PACKAGE_NAME"""
+        raise NotImplementedError
+
+    def needs_requirement(self, req, phase):
+        logger = logging.getLogger('upt')
+        versions = self.package_versions(req.name)
+        if not versions:
+            logger.info(f'Dependency {req}: currently not packaged. '
+                        f'Packaging it.')
+            return True
+
+        if not req.specifier:
+            logger.info(f'Dependency {req}: currently packaged, no specific '
+                        f'version is required. Not packaging it.')
+            return False
+
+        s = SpecifierSet(req.specifier)
+        compatible_versions = list(s.filter(versions))
+        if compatible_versions:
+            logger.info(f'Dependency {req}: at least one compatible version '
+                        f'found in {compatible_versions}. Not packaging it.')
+            return False
+        else:
+            logger.info(f'Dependency {req}: no compatible version found '
+                        f'in {versions}. Packaging it.')
+            return True
 
 
 class Frontend(object):
@@ -230,6 +257,8 @@ def create_parser(frontends, backends):
     logger_group.add_argument('-q', '--quiet', action='store_const',
                               const=logging.CRITICAL+1, dest='log_level',
                               help='Suppress all logging output')
+    parser_package.add_argument('-r', '--recursive', action='store_true',
+                                help='Recursively package requirements'),
     parser_package.add_argument('package', help='Name of the package')
 
     return parser
@@ -250,6 +279,39 @@ def _get_installed_frontends():
 
 def _get_installed_backends():
     return _get_installed_plugins('upt.backends')
+
+
+def package(pkg_name, frontend, backend, output, recursive, packaged=[]):
+    logger = logging.getLogger('upt')
+
+    try:
+        upt_pkg = None
+        upt.log.logger_set_formatter(logger, 'Frontend')
+        upt_pkg = frontend.parse(pkg_name)
+        upt_pkg.frontend = frontend.name
+        upt.log.logger_set_formatter(logger, 'Backend')
+        backend.create_package(upt_pkg, output=output)
+        packaged.append(pkg_name)
+        if recursive:
+            for phase, requirements in upt_pkg.requirements.items():
+                for requirement in requirements:
+                    # Let's not repackage what we have already packaged.
+                    if requirement.name in packaged:
+                        continue
+
+                    if backend.needs_requirement(requirement, phase):
+                        package(requirement.name, frontend, backend,
+                                output, recursive, packaged)
+    except upt.exceptions.UnhandledFrontendError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+    except upt.exceptions.InvalidPackageNameError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+    finally:
+        if upt_pkg is not None:
+            # We always want to clean up after ourselves.
+            upt_pkg._clean()
 
 
 def main():
@@ -291,22 +353,5 @@ def main():
         # values for us.
         frontend = frontends[args.frontend]()
         backend = backends[args.backend]()
-        logger = upt.log.create_logger(args.log_level)
-
-        try:
-            upt_pkg = None
-            upt.log.logger_set_formatter(logger, 'Frontend')
-            upt_pkg = frontend.parse(args.package)
-            upt_pkg.frontend = args.frontend
-            upt.log.logger_set_formatter(logger, 'Backend')
-            backend.create_package(upt_pkg, output=args.output)
-        except upt.exceptions.UnhandledFrontendError as e:
-            print(e, file=sys.stderr)
-            sys.exit(1)
-        except upt.exceptions.InvalidPackageNameError as e:
-            print(e, file=sys.stderr)
-            sys.exit(1)
-        finally:
-            if upt_pkg is not None:
-                # We always want to clean up after ourselves.
-                upt_pkg._clean()
+        upt.log.create_logger(args.log_level)
+        package(args.package, frontend, backend, args.output, args.recursive)

@@ -71,6 +71,10 @@ on the backend: it should do the most natural thing.
 
 : Suppress all logging output. Cannot be used with \--debug.
 
+-r, \--recursive
+
+: Recursively package requirements.
+
 
 # BACKENDS
 **upt-fedora**

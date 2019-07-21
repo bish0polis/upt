@@ -339,6 +339,7 @@ class TestRecursion(unittest.TestCase):
         self.frontend = mock.Mock()
         self.frontend.parse.return_value = self.package
         self.backend = mock.Mock()
+        self.backend.package_versions = mock.Mock()
 
     def test_no_dependencies(self):
         upt.upt.package('foo', self.frontend, self.backend, None, True, [])
@@ -374,27 +375,58 @@ class TestBackend(unittest.TestCase):
     def setUp(self):
         self.backend = upt.upt.Backend()
 
-    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=[])
-    def test_needs_requirement_not_packaged(self, mock_pkg):
+    def test_needs_requirement_not_packaged(self):
+        self.backend.package_versions = lambda x: []
         requirement = upt.PackageRequirement('foo')
         self.assertTrue(self.backend.needs_requirement(requirement, None))
 
-    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
-    def test_needs_requirement_incompatible_version(self, mock_pkg):
+    def test_needs_requirement_incompatible_version(self):
+        self.backend.package_versions = lambda x: ['1']
         requirement = upt.PackageRequirement('foo', '>2')
         self.assertTrue(self.backend.needs_requirement(requirement, None))
 
-    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
-    def test_needs_requirement_compatible_version(self, mock_pkg):
+    def test_needs_requirement_compatible_version(self):
+        self.backend.package_versions = lambda x: ['1']
         requirement = upt.PackageRequirement('foo', '>0.5')
         self.assertFalse(self.backend.needs_requirement(requirement, None))
 
-    @mock.patch.object(upt.upt.Backend, 'package_versions', return_value=['1'])
-    def test_needs_requirement_no_specifier(self, mock_pkg):
+    def test_needs_requirement_no_specifier(self):
+        self.backend.package_versions = lambda x: ['1']
         requirement = upt.PackageRequirement('foo')
         self.assertFalse(self.backend.needs_requirement(requirement, None))
 
-    def test_package_versions_not_overriden(self):
+    def test_needs_requirement_interactive_y(self):
         requirement = upt.PackageRequirement('foo')
-        with self.assertRaises(NotImplementedError):
+        with mock.patch('builtins.input', return_value='y'):
+            out = self.backend.needs_requirement_interactive(requirement, None)
+            self.assertTrue(out)
+
+    def test_needs_requirement_interactive_yes(self):
+        requirement = upt.PackageRequirement('foo')
+        with mock.patch('builtins.input', return_value='yes'):
+            out = self.backend.needs_requirement_interactive(requirement, None)
+            self.assertTrue(out)
+
+    def test_needs_requirement_interactive_n(self):
+        requirement = upt.PackageRequirement('foo')
+        with mock.patch('builtins.input', return_value='n'):
+            out = self.backend.needs_requirement_interactive(requirement, None)
+            self.assertFalse(out)
+
+    def test_needs_requirement_interactive_no(self):
+        requirement = upt.PackageRequirement('foo')
+        with mock.patch('builtins.input', return_value='no'):
+            out = self.backend.needs_requirement_interactive(requirement, None)
+            self.assertFalse(out)
+
+    def test_needs_requirement_interactive_invalid(self):
+        requirement = upt.PackageRequirement('foo')
+        with mock.patch('builtins.input', side_effect=['invalid', 'n']):
+            out = self.backend.needs_requirement_interactive(requirement, None)
+            self.assertFalse(out)
+
+    def test_package_versions_not_implemented(self):
+        requirement = upt.PackageRequirement('foo')
+        with mock.patch('upt.upt.Backend.needs_requirement_interactive'):
             self.backend.needs_requirement(requirement, None)
+            self.backend.needs_requirement_interactive.assert_called()

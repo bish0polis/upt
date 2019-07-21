@@ -18,12 +18,21 @@ import upt.log
 
 
 class Backend(object):
-    def package_versions(self, package_name):
-        """Return a list of available versions of PACKAGE_NAME"""
-        raise NotImplementedError
+    def needs_requirement_interactive(self, req, phase):
+        while True:
+            ret = input(f'Should we package {req} (phase {phase})? [y/n] ')
+            if ret.lower() in ('y', 'yes'):
+                return True
+            elif ret.lower() in ('n', 'no'):
+                return False
+            else:
+                continue  # pragma: nocover
 
     def needs_requirement(self, req, phase):
         logger = logging.getLogger('upt')
+        if not hasattr(self, 'package_versions'):
+            return self.needs_requirement_interactive(req, phase)
+
         versions = self.package_versions(req.name)
         if not versions:
             logger.info(f'Dependency {req}: currently not packaged. '

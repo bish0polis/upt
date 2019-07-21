@@ -47,12 +47,17 @@ def _compute_sha256_base64_checksum(filepath):
     return base64.b64encode(binascii.a2b_hex(sha256)).decode('ascii')
 
 
+def _compute_sha512_checksum(filepath):
+    return _compute_checksum(hashlib.sha512, filepath)
+
+
 def compute_checksum(filepath, hash_name):
     hash_functions = {
         'md5': _compute_md5_checksum,
         'rmd160': _compute_rmd160_checksum,
         'sha256': _compute_sha256_checksum,
         'sha256_base64': _compute_sha256_base64_checksum,
+        'sha512': _compute_sha512_checksum,
     }
     try:
         return hash_functions[hash_name](filepath)

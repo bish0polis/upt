@@ -77,7 +77,8 @@ class Archive(object):
     This can be a source tarball, a Python wheel, a Ruby gem, a binary, etc.
     '''
     def __init__(self, url, archive_type=ArchiveType.SOURCE_TARGZ, size=0,
-                 md5=None, sha256=None, rmd160=None, sha256_base64=None):
+                 md5=None, sha256=None, rmd160=None, sha256_base64=None,
+                 sha512=None):
         self.url = url
         self.archive_type = archive_type
         self._size = size
@@ -92,6 +93,8 @@ class Archive(object):
             self.rmd160 = rmd160
         if sha256_base64 is not None:
             self.sha256_base64 = sha256_base64
+        if sha512 is not None:
+            self.sha512 = sha512
 
     @property
     def filepath(self):
@@ -151,6 +154,14 @@ class Archive(object):
     @sha256_base64.setter
     def sha256_base64(self, value):
         self._hashes['sha256_base64'] = value
+
+    @property
+    def sha512(self):
+        return self._checksum('sha512')
+
+    @sha512.setter
+    def sha512(self, value):
+        self._hashes['sha512'] = value
 
 
 class PackageRequirement(object):

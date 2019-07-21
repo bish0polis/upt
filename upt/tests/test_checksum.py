@@ -12,6 +12,7 @@ class TestChecksum(unittest.TestCase):
     MD5 = '3858f62230ac3c915f300c664312c63f'
     SHA256 = 'c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2'
     SHA256_BASE64 = 'w6uP8Tcg6K2QR905Rms8iXTlksL6OD1KOWBxTK7wxPI='
+    SHA512 = '0a50261ebd1a390fed2bf326f2673c145582a6342d523204973d0219337f81616a8069b012587cf5635f6925f1b56c360230c19b273500ee013e030601bf2425' # noqa
 
     def setUp(self):
         self.path = '/fake/path'
@@ -26,6 +27,10 @@ class TestChecksum(unittest.TestCase):
     def test_sha256_base64_checksum(self, open_fn):
         self.assertEqual(checksum._compute_sha256_base64_checksum(self.path),
                          self.SHA256_BASE64)
+
+    def test_sha512_checksum(self, open_fn):
+        self.assertEqual(checksum._compute_sha512_checksum(self.path),
+                         self.SHA512)
 
     def test_compute_checksum(self, open_fn):
         self.assertEqual(checksum.compute_checksum(self.path, 'md5'), self.MD5)

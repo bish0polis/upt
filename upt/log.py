@@ -4,6 +4,8 @@
 import logging
 import sys
 
+import colorlog
+
 
 class MaxLevelFilter(logging.Filter):
     def __init__(self, max_level):
@@ -14,7 +16,7 @@ class MaxLevelFilter(logging.Filter):
         return record.levelno < self.max_level
 
 
-def create_logger(log_level):
+def create_logger(log_level, colored=False):
     logger = logging.getLogger('upt')
     logger.setLevel(log_level or logging.INFO)
 
@@ -26,10 +28,16 @@ def create_logger(log_level):
     stderr_handler.setLevel(logging.ERROR)
     logger.addHandler(stderr_handler)
 
+    logger.colored = colored
+
     return logger
 
 
 def logger_set_formatter(logger, name):
-    formatter = logging.Formatter(f'[%(levelname)-8s] [{name}] %(message)s')
+    log_format = f'[%(levelname)-8s] [{name}] %(message)s'
+    if logger.colored:
+        formatter = colorlog.ColoredFormatter(f'%(log_color)s {log_format}')
+    else:
+        formatter = logging.Formatter(log_format)
     for handler in logger.handlers:
         handler.setFormatter(formatter)

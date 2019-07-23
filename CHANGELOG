@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- New option: --color, to show colored logs
+
 ## [0.10.3] - 2019-07-31
 ### Fixed
 - The "wheel" package is no longer required when not building a wheel

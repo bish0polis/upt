@@ -164,6 +164,12 @@ class TestParser(unittest.TestCase):
         with self.assertRaises(SystemExit):
             parser.parse_args(args)
 
+    def test_package_colored_output(self):
+        parser = upt.upt.create_parser(['pypi'], ['guix'])
+        args = 'package --color requests'.split()
+        parsed_args = parser.parse_args(args)
+        self.assertTrue(parsed_args.color)
+
 
 class TestCommandLine(unittest.TestCase):
     def setUp(self):

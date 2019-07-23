@@ -279,6 +279,8 @@ def create_parser(frontends, backends):
                               help='Suppress all logging output')
     parser_package.add_argument('-r', '--recursive', action='store_true',
                                 help='Recursively package requirements'),
+    parser_package.add_argument('-c', '--color', action='store_true',
+                                help='Show colored logging output'),
     parser_package.add_argument('package', help='Name of the package')
 
     return parser
@@ -373,5 +375,5 @@ def main():
         # values for us.
         frontend = frontends[args.frontend]()
         backend = backends[args.backend]()
-        upt.log.create_logger(args.log_level)
+        upt.log.create_logger(args.log_level, args.color)
         package(args.package, frontend, backend, args.output, args.recursive)

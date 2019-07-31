@@ -7,7 +7,13 @@ import subprocess
 
 from setuptools import setup
 from setuptools.command.sdist import sdist
-from wheel.bdist_wheel import bdist_wheel
+try:
+    from wheel.bdist_wheel import bdist_wheel
+    has_wheel = True
+except ImportError:
+    import distutils.cmd
+    import sys
+    has_wheel = False
 
 
 def generate_manpage():
@@ -38,10 +44,24 @@ class SdistCommand(sdist):
         sdist.run(self)
 
 
-class BdistwheelCommand(bdist_wheel):
-    def run(self):
-        generate_manpage()
-        bdist_wheel.run(self)
+if has_wheel:
+    class BdistwheelCommand(bdist_wheel):
+        def run(self):
+            generate_manpage()
+            bdist_wheel.run(self)
+else:
+    class BdistwheelCommand(distutils.cmd.Command):
+        user_options = []
+
+        def initialize_options(self):
+            pass
+
+        def finalize_options(self):
+            pass
+
+        def run(self):
+            sys.exit('You need to install the "wheel" package to run '
+                     'bdist_wheel')
 
 
 setup(

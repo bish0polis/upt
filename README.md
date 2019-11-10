@@ -75,6 +75,15 @@ You may also want to package a version other than the latest one:
 
 The package definition will be written to the standard output.
 
+You may update an existing package to the latest version:
+
+    $ upt package -f pypi -b guix -u requests
+
+You may update an existing package to a specific version:
+
+    $ upt package -f pypi -b guix -u requests@2.22.0
+
+
 
 ## Under the hood
 There are two kinds of places from where packages may be installed:

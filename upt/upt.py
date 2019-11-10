@@ -18,6 +18,18 @@ import upt.log
 
 
 class Backend(object):
+    def current_version(self, frontend, pkgname, output=None):
+        """Return the currently packaged version of a package.
+
+        This method must return the currently packaged version of PKGNAME,
+        packaged using the given FRONTEND.
+        TODO: output
+        """
+        return input(f'Current version of {pkgname} ({frontend.name})?')
+
+    def update_package(self, pdiff, output=None):
+        raise NotImplementedError()
+
     def needs_requirement_interactive(self, req, phase):
         while True:
             ret = input(f'Should we package {req} (phase {phase})? [y/n] ')
@@ -59,6 +71,15 @@ class Backend(object):
 class Frontend(object):
     """Base class for all upt Frontends."""
     pass
+
+
+class PackageUpToDateException(Exception):
+    def __init__(self, pkgname, version):
+        self.pkgname = pkgname
+        self.version = version
+
+    def __str__(self):
+        return f'{self.pkg_name} is already up-to-date ({self.version})'
 
 
 class ArchiveType(Enum):
@@ -239,6 +260,42 @@ class Package(object):
                 os.remove(archive._filepath)
 
 
+class PackageDiff(object):
+    def __init__(self, old, new):
+        self.old = old
+        self.new = new
+
+    @property
+    def old_version(self):
+        return self.old.version
+
+    @property
+    def new_version(self):
+        return self.new.version
+
+    def new_requirements(self, phase):
+        old_names = [req.name for req in self.old.requirements.get(phase, [])]
+        new_names = [req.name for req in self.new.requirements.get(phase, [])]
+        added_names = set(new_names) - set(old_names)
+        return [
+            req for req in self.new.requirements.get(phase, [])
+            if req.name in added_names
+        ]
+
+    def updated_requirements(self, phase):
+        # TODO
+        return []
+
+    def deleted_requirements(self, phase):
+        old_names = [req.name for req in self.old.requirements.get(phase, [])]
+        new_names = [req.name for req in self.new.requirements.get(phase, [])]
+        deleted_names = set(old_names) - set(new_names)
+        return [
+            req for req in self.old.requirements.get(phase, [])
+            if req.name in deleted_names
+        ]
+
+
 def create_parser(frontends, backends):
     parser = argparse.ArgumentParser(prog='upt')
 
@@ -281,6 +338,8 @@ def create_parser(frontends, backends):
                                 help='Recursively package requirements'),
     parser_package.add_argument('-c', '--color', action='store_true',
                                 help='Show colored logging output'),
+    parser_package.add_argument('-u', '--update', action='store_true',
+                                help='Update package'),
     parser_package.add_argument('package', help='Name of the package. '
                                                 'Use <package>@<version> to '
                                                 'package a specific version.')
@@ -348,6 +407,34 @@ def _extract_name_version_from_package(package):
     return name, version or None
 
 
+def update(pkg_name, version, frontend, backend, output):
+    logger = logging.getLogger('upt')
+
+    upt.log.logger_set_formatter(logger, 'Backend')
+    old_version = backend.current_version(frontend, pkg_name, output)
+
+    # Parse both the old and the new version of the package in order to create
+    # a "diff".
+    upt.log.logger_set_formatter(logger, 'Frontend')
+    old_pkg = frontend.parse(pkg_name, old_version)
+    old_pkg.frontend = frontend.name
+    new_pkg = frontend.parse(pkg_name, version)
+    new_pkg.frontend = frontend.name
+    diff = PackageDiff(old_pkg, new_pkg)
+    if diff.new_version == old_version:
+        raise PackageUpToDateException(pkg_name, old_version)
+
+    # Let the backend do its magic.
+    upt.log.logger_set_formatter(logger, 'Backend')
+    logger.info(f'Updating {pkg_name} from {old_version} to {new_pkg.version}')
+    try:
+        backend.update_package(diff, output=output)
+    except NotImplementedError:
+        logger.error(f'The "{backend.name}" backend  does not implement the '
+                     'update feature yet.')
+        sys.exit(1)
+
+
 def main():
     frontends = _get_installed_frontends()
     backends = _get_installed_backends()
@@ -389,4 +476,12 @@ def main():
         backend = backends[args.backend]()
         name, version = _extract_name_version_from_package(args.package)
         upt.log.create_logger(args.log_level, args.color)
-        package(name, version, frontend, backend, args.output, args.recursive)
+        if args.update:
+            try:
+                update(name, version, frontend, backend, args.output)
+            except PackageUpToDateException as e:
+                logger = logging.getLogger('upt')
+                logger.info(e)
+        else:
+            package(name, version, frontend, backend, args.output,
+                    args.recursive)

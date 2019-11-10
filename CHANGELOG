@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- New option: --update/-u to update a package
+
 ## [0.11] - 2019-12-09
 ### Added
 - New option: --color, to show colored logs

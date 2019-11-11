@@ -117,6 +117,19 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(upt.upt._get_installed_backends(),
                              fake_backends)
 
+    def test_extract_name_version_from_package(self):
+        test_data = [
+            ('foobar', ('foobar', None)),
+            ('foobar@1.2', ('foobar', '1.2')),
+            ('foobar@', ('foobar', None)),
+        ]
+
+        for pkgname, expected_result in test_data:
+            self.assertEqual(
+                upt.upt._extract_name_version_from_package(pkgname),
+                expected_result
+            )
+
 
 class TestParser(unittest.TestCase):
     def test_package_single_frontend(self):
@@ -132,6 +145,11 @@ class TestParser(unittest.TestCase):
     def test_package_recursive(self):
         parser = upt.upt.create_parser(['pypi'], ['guix'])
         args = 'package -r requests'.split()
+        parser.parse_args(args)
+
+    def test_package_specific_version(self):
+        parser = upt.upt.create_parser(['pypi'], ['guix'])
+        args = 'package requests@2.16.0'.split()
         parser.parse_args(args)
 
     def test_package_missing_frontend(self):
@@ -291,6 +309,27 @@ class TestCommandLine(unittest.TestCase):
             upt.upt.main()
         self.assertEqual(exit.exception.code, 1)
 
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends',
+                return_value={'valid-backend': mock.Mock()})
+    def test_package_invalid_package_version(self, m_backends, m_frontends):
+        cmdline = 'package -f valid-frontend -b valid-backend pkgname@13.37'
+        sys.argv.extend(cmdline.split())
+
+        def frontend_fail(*args, **kwargs):
+            raise upt.exceptions.InvalidPackageVersionError('valid-backend',
+                                                            'pkgname',
+                                                            '13.37')
+        fake_frontend = mock.Mock()
+        fake_frontend().parse.side_effect = frontend_fail
+        m_frontends.return_value = {
+            'valid-frontend': fake_frontend
+        }
+        with self.assertRaises(SystemExit) as exit:
+            upt.upt.main()
+        self.assertEqual(exit.exception.code, 1)
+
 
 class TestArchive(unittest.TestCase):
     def setUp(self):
@@ -350,7 +389,8 @@ class TestRecursion(unittest.TestCase):
         self.backend.package_versions = mock.Mock()
 
     def test_no_dependencies(self):
-        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        upt.upt.package('foo', None, self.frontend, self.backend,
+                        None, True, [])
         self.backend.create_package.assert_called()
         self.backend.needs_requirement.assert_not_called()
 
@@ -358,7 +398,8 @@ class TestRecursion(unittest.TestCase):
         self.package.requirements = {
             'run': [upt.PackageRequirement('bar')]
         }
-        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        upt.upt.package('foo', None, self.frontend, self.backend,
+                        None, True, [])
         self.backend.create_package.assert_called()
         self.backend.needs_requirement.assert_called()
 
@@ -366,7 +407,8 @@ class TestRecursion(unittest.TestCase):
         self.package.requirements = {
             'run': [upt.PackageRequirement('foo')]
         }
-        upt.upt.package('foo', self.frontend, self.backend, None, True, [])
+        upt.upt.package('foo', None, self.frontend, self.backend,
+                        None, True, [])
         self.backend.create_package.assert_called_once()
         self.backend.needs_requirement.assert_not_called()
 
@@ -374,7 +416,8 @@ class TestRecursion(unittest.TestCase):
         self.package.requirements = {
             'run': [upt.PackageRequirement('bar')]
         }
-        upt.upt.package('foo', self.frontend, self.backend, None, False, [])
+        upt.upt.package('foo', None, self.frontend, self.backend,
+                        None, False, [])
         self.backend.create_package.assert_called_once()
         self.backend.needs_requirement.assert_not_called()
 

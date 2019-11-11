@@ -14,6 +14,18 @@ class InvalidPackageNameError(Exception):
                 f'{self.backend}')
 
 
+class InvalidPackageVersionError(Exception):
+    """Invalid or non-existing version of a valid package"""
+    def __init__(self, backend, pkg_name, version):
+        self.backend = backend
+        self.pkg_name = pkg_name
+        self.version = version
+
+    def __str__(self):
+        return (f'Version {self.version} of package {self.pkg_name} '
+                f'could not be found by backend {self.backend}')
+
+
 class UnhandledFrontendError(Exception):
     """Frontend not supported by backend."""
     def __init__(self, backend, frontend):

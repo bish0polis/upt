@@ -69,6 +69,10 @@ You may also want to recursively package all of its requirements:
 
     $ upt package -f pypi -b guix -r requests
 
+You may also want to package a version other than the latest one:
+
+    $ upt package -f pypi -b guix requests@2.16.0
+
 The package definition will be written to the standard output.
 
 

@@ -281,7 +281,9 @@ def create_parser(frontends, backends):
                                 help='Recursively package requirements'),
     parser_package.add_argument('-c', '--color', action='store_true',
                                 help='Show colored logging output'),
-    parser_package.add_argument('package', help='Name of the package')
+    parser_package.add_argument('package', help='Name of the package. '
+                                                'Use <package>@<version> to '
+                                                'package a specific version.')
 
     return parser
 
@@ -303,13 +305,14 @@ def _get_installed_backends():
     return _get_installed_plugins('upt.backends')
 
 
-def package(pkg_name, frontend, backend, output, recursive, packaged=[]):
+def package(pkg_name, version, frontend, backend, output, recursive,
+            packaged=[]):
     logger = logging.getLogger('upt')
 
     try:
         upt_pkg = None
         upt.log.logger_set_formatter(logger, 'Frontend')
-        upt_pkg = frontend.parse(pkg_name)
+        upt_pkg = frontend.parse(pkg_name, version)
         upt_pkg.frontend = frontend.name
         upt.log.logger_set_formatter(logger, 'Backend')
         backend.create_package(upt_pkg, output=output)
@@ -322,18 +325,27 @@ def package(pkg_name, frontend, backend, output, recursive, packaged=[]):
                         continue
 
                     if backend.needs_requirement(requirement, phase):
-                        package(requirement.name, frontend, backend,
+                        package(requirement.name, None, frontend, backend,
                                 output, recursive, packaged)
     except upt.exceptions.UnhandledFrontendError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
-    except upt.exceptions.InvalidPackageNameError as e:
+    except (upt.exceptions.InvalidPackageNameError,
+            upt.exceptions.InvalidPackageVersionError) as e:
         print(e, file=sys.stderr)
         sys.exit(1)
     finally:
         if upt_pkg is not None:
             # We always want to clean up after ourselves.
             upt_pkg._clean()
+
+
+def _extract_name_version_from_package(package):
+    try:
+        name, version = package.split('@')
+    except ValueError:
+        name, version = package, None
+    return name, version or None
 
 
 def main():
@@ -375,5 +387,6 @@ def main():
         # values for us.
         frontend = frontends[args.frontend]()
         backend = backends[args.backend]()
+        name, version = _extract_name_version_from_package(args.package)
         upt.log.create_logger(args.log_level, args.color)
-        package(args.package, frontend, backend, args.output, args.recursive)
+        package(name, version, frontend, backend, args.output, args.recursive)

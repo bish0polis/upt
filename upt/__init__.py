@@ -10,6 +10,7 @@ from .upt import Frontend
 from .upt import Package
 from .upt import PackageRequirement
 from .exceptions import InvalidPackageNameError
+from .exceptions import InvalidPackageVersionError
 from .exceptions import UnhandledFrontendError
 from .checksum import HashUnknown
 from .checksum import HashUnavailable

@@ -6,6 +6,8 @@ Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Added
 - New option: --color, to show colored logs
+- Allow users to specify a specific version of the package on the CLI
+  using "package@version"
 
 ## [0.10.3] - 2019-07-31
 ### Fixed

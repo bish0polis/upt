@@ -14,7 +14,7 @@ upt list-backends
 
 upt list-frontends
 
-upt package [-f FRONTEND] [-b BACKEND] [-o OUTPUT] [\--debug] [\--quiet] PACKAGE
+upt package [-f FRONTEND] [-b BACKEND] [-o OUTPUT] [\--debug] [\--quiet] PACKAGE[@VERSION]
 
 # DESCRIPTION
 Create a package for a distribution (such as OpenBSD, Fedora, etc.) from a
@@ -36,8 +36,9 @@ The following subcommands are available:
 **list-frontends**
 : List all installed frontends.
 
-**package [options...] \<package>**
+**package [options...] \<package>[@version]**
 : Package the given package. This usually requires options, described below.
+  If no version is specified, the latest one is used.
 
 
 # OPTIONS
@@ -126,6 +127,11 @@ on the backend: it should do the most natural thing.
 **Same, omitting "-f" when there is only one installed frontend**
 
 : upt package requests
+
+
+**Same, but package a given version**
+
+: upt package requests@2.16.0
 
 # BUGS
 

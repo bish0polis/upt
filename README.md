@@ -374,6 +374,8 @@ how to use this logger.
 
 - [upt-cpan](https://pypi.python.org/pypi/upt-cpan) a frontend for
   [CPAN](https://www.cpan.org/)
+- [upt-cran](https://pypi.python.org/pypi/upt-cran) a frontend for
+  [CRAN](https://cran.r-project.org/)
 - [upt-pypi](https://pypi.python.org/pypi/upt-pypi) a frontend for
   [PyPI](https://pypi.python.org/)
 - [upt-rubygems](https://pypi.python.org/pypi/upt-rubygems) a frontend for

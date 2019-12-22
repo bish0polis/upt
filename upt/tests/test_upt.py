@@ -6,6 +6,9 @@ import unittest
 from unittest import mock
 import sys
 
+import requests
+import requests_mock
+
 import upt
 
 
@@ -57,6 +60,49 @@ class TestPackage(unittest.TestCase):
         pkg = upt.Package('foo', '4.2', archives=archives)
         pkg._clean()
         remove_fn.assert_not_called()
+
+    @requests_mock.mock()
+    def test_http_to_https(self, fake_requests):
+        http_url = 'http://www.python.org'
+        https_url = 'https://www.python.org'
+        fake_requests.head(https_url, status_code=200)
+        self.assertEqual(upt.Package._http_to_https(http_url), https_url)
+
+        pkg = upt.Package('foo', None, homepage=http_url)
+        self.assertEqual(pkg.homepage, https_url)
+
+    def test_http_to_https_already_https(self):
+        https_url = 'https://www.python.org'
+        self.assertEqual(upt.Package._http_to_https(https_url), https_url)
+
+        pkg = upt.Package('foo', None, homepage=https_url)
+        self.assertEqual(pkg.homepage, https_url)
+
+    def test_http_to_https_not_http_not_https(self):
+        url = 'www.python.org'
+        self.assertEqual(upt.Package._http_to_https(url), url)
+        pkg = upt.Package('foo', None, homepage=url)
+        self.assertEqual(pkg.homepage, url)
+
+    @requests_mock.mock()
+    def test_http_to_https_no_https(self, fake_requests):
+        http_url = 'http://www.python.org'
+        https_url = 'https://www.python.org'
+        fake_requests.head(https_url, exc=requests.exceptions.ConnectionError)
+        self.assertEqual(upt.Package._http_to_https(http_url), http_url)
+
+        pkg = upt.Package('foo', None, homepage=http_url)
+        self.assertEqual(pkg.homepage, http_url)
+
+    @requests_mock.mock()
+    def test_http_to_https_timeout(self, fake_requests):
+        http_url = 'http://www.python.org'
+        https_url = 'https://www.python.org'
+        fake_requests.head(https_url, exc=requests.exceptions.ConnectTimeout)
+        self.assertEqual(upt.Package._http_to_https(http_url), http_url)
+
+        pkg = upt.Package('foo', None, homepage=http_url)
+        self.assertEqual(pkg.homepage, http_url)
 
 
 class TestPackageRequirement(unittest.TestCase):

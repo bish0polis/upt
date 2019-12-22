@@ -11,6 +11,7 @@ import tempfile
 
 from packaging.specifiers import SpecifierSet
 import pkg_resources
+import requests
 
 import upt.checksum
 import upt.exceptions
@@ -211,7 +212,7 @@ class Package(object):
     def __init__(self, name, version, **kwargs):
         self.name = name
         self.version = version
-        self.homepage = kwargs.get('homepage', '')
+        self.homepage = self._http_to_https(kwargs.get('homepage', ''))
         self.summary = kwargs.get('summary', '')
         self.description = kwargs.get('description', '')
         # Software requirements, as instances of PackageRequirement: {
@@ -225,6 +226,22 @@ class Package(object):
 
     def __str__(self):
         return f'{self.name}@{self.version}'
+
+    @staticmethod
+    def _http_to_https(url):
+        if url.startswith('https:'):
+            return url
+
+        if not url.startswith('http:'):
+            # This is a bit weird, let's not even try
+            return url
+
+        https_url = url.replace('http:', 'https:')
+        try:
+            requests.head(https_url, timeout=1)
+            return https_url
+        except requests.exceptions.RequestException:
+            return url
 
     def get_archive(self, archive_type=ArchiveType.SOURCE_TARGZ):
         for archive in self.archives:

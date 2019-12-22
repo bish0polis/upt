@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 Based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- Try to use https for the homepage returned by frontends
+
 ## [0.11] - 2019-12-09
 ### Added
 - New option: --color, to show colored logs

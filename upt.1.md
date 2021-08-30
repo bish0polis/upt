@@ -14,7 +14,7 @@ upt list-backends
 
 upt list-frontends
 
-upt package [-f FRONTEND] [-b BACKEND] [-o OUTPUT] [\--debug] [\--quiet] PACKAGE[@VERSION]
+upt package [-f FRONTEND] [-b BACKEND] [-o OUTPUT] [-u/\--update] [\--debug] [\--quiet] PACKAGE[@VERSION]
 
 # DESCRIPTION
 Create a package for a distribution (such as OpenBSD, Fedora, etc.) from a
@@ -81,6 +81,10 @@ on the backend: it should do the most natural thing.
 
 : Recursively package requirements.
 
+-u, \--update
+
+: Update a package.
+
 
 # BACKENDS
 **upt-fedora**
@@ -137,6 +141,14 @@ on the backend: it should do the most natural thing.
 **Same, but package a given version**
 
 : upt package requests@2.16.0
+
+**Update an existing package**
+
+: upt package -f pypi -b macports -u requests
+
+**Update an existing package to a specific version**
+
+: upt package -f pypi -b macports -u requests@2.22.0
 
 # BUGS
 

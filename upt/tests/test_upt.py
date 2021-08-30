@@ -82,6 +82,66 @@ class TestPackageRequirement(unittest.TestCase):
         self.assertNotEqual(pkg_req_a, pkg_req_b)
 
 
+class TestPackageDiff(unittest.TestCase):
+    def test_new_version(self):
+        oldpkg = upt.Package('foo', '1.0')
+        newpkg = upt.Package('foo', '1.1')
+        diff = upt.PackageDiff(oldpkg, newpkg)
+        self.assertEqual(diff.new_version, newpkg.version)
+
+    def test_old_version(self):
+        oldpkg = upt.Package('foo', '1.0')
+        newpkg = upt.Package('foo', '1.1')
+        diff = upt.PackageDiff(oldpkg, newpkg)
+        self.assertEqual(diff.old_version, oldpkg.version)
+
+    def test_new_requirements(self):
+        oldreqs = {
+            'run': [upt.PackageRequirement('bar')]
+        }
+        oldpkg = upt.Package('foo', '1.1', requirements=oldreqs)
+        newreqs = {
+            'run': [
+                upt.PackageRequirement('bar'),
+                upt.PackageRequirement('baz')
+            ]
+        }
+        newpkg = upt.Package('foo', '1.1', requirements=newreqs)
+        diff = upt.PackageDiff(oldpkg, newpkg)
+        self.assertEqual(diff.new_requirements('build'), [])
+        self.assertEqual(diff.new_requirements('run'), newreqs['run'][1:])
+        self.assertEqual(diff.new_requirements('test'), [])
+
+    def test_updated_requirements(self):
+        oldreqs = {
+            'run': [upt.PackageRequirement('bar', '>=1.0')]
+        }
+        oldpkg = upt.Package('foo', '1.0', requirements=oldreqs)
+        newreqs = {
+            'run': [upt.PackageRequirement('bar', '>=1.1')]
+        }
+        newpkg = upt.Package('foo', '1.0', requirements=newreqs)
+        diff = upt.PackageDiff(oldpkg, newpkg)
+        self.assertEqual(diff.updated_requirements('build'), [])
+        self.assertEqual(diff.updated_requirements('run'),
+                         [upt.PackageRequirement('bar', '>=1.1')])
+        self.assertEqual(diff.updated_requirements('test'), [])
+
+    def test_deleted_requirements(self):
+        oldreqs = {
+            'run': [upt.PackageRequirement('bar')]
+        }
+        oldpkg = upt.Package('foo', '1.0', requirements=oldreqs)
+        newreqs = {
+            'run': []
+        }
+        newpkg = upt.Package('foo', '1.0', requirements=newreqs)
+        diff = upt.PackageDiff(oldpkg, newpkg)
+        self.assertEqual(diff.deleted_requirements('build'), [])
+        self.assertEqual(diff.deleted_requirements('run'), oldreqs['run'])
+        self.assertEqual(diff.deleted_requirements('test'), [])
+
+
 class TestUtils(unittest.TestCase):
     @mock.patch('pkg_resources.iter_entry_points')
     def test_get_installed_plugins(self, m_iter_entry_points):
@@ -145,6 +205,11 @@ class TestParser(unittest.TestCase):
     def test_package_recursive(self):
         parser = upt.upt.create_parser(['pypi'], ['guix'])
         args = 'package -r requests'.split()
+        parser.parse_args(args)
+
+    def test_package_update(self):
+        parser = upt.upt.create_parser(['pypi'], ['guix'])
+        args = 'package -u requests'.split()
         parser.parse_args(args)
 
     def test_package_specific_version(self):
@@ -330,6 +395,87 @@ class TestCommandLine(unittest.TestCase):
             upt.upt.main()
         self.assertEqual(exit.exception.code, 1)
 
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends')
+    def test_package_update_not_supported(self, m_backends, m_frontends):
+        cmdline = 'package -f valid-frontend -b valid-backend -u pkgname'
+        sys.argv.extend(cmdline.split())
+
+        def backend_fail(*args, **kwargs):
+            raise NotImplementedError
+
+        fake_backend = mock.Mock()
+        fake_backend().update_package.side_effect = backend_fail
+        m_backends.return_value = {
+            'valid-backend': fake_backend,
+        }
+        with self.assertRaises(SystemExit) as exit:
+            upt.upt.main()
+        self.assertEqual(exit.exception.code, 1)
+
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends')
+    @mock.patch('sys.stdout', new_callable=StringIO)
+    def test_package_update_already_up_to_date(self, m_stdout,
+                                               m_backends, m_frontends):
+        cmdline = 'package -f valid-frontend -b valid-backend -u pkgname'
+        sys.argv.extend(cmdline.split())
+
+        def frontend_parse(*args, **kwargs):
+            return upt.upt.Package('foo', '42.0')
+
+        def backend_update(*args, **kwargs):
+            raise upt.upt.PackageUpToDateException('pkgname', '42.0')
+
+        fake_frontend = mock.Mock()
+        fake_frontend().parse.side_effect = frontend_parse
+        m_frontends.return_value = {
+            'valid-frontend': fake_frontend
+        }
+        fake_backend = mock.Mock()
+        fake_backend().update_package.side_effect = backend_update
+        m_backends.return_value = {
+            'valid-backend': fake_backend,
+        }
+        upt.upt.main()
+        self.assertIn(str(upt.upt.PackageUpToDateException('pkgname', '42.0')),
+                      m_stdout.getvalue().split('\n')[-2])
+
+    @mock.patch('upt.upt._get_installed_frontends',
+                return_value={'valid-frontend': mock.Mock()})
+    @mock.patch('upt.upt._get_installed_backends')
+    @mock.patch('sys.stderr', new_callable=StringIO)
+    def test_package_update_unavailable(self, m_stderr, m_backends,
+                                        m_frontends):
+        cmdline = 'package -f valid-frontend -b valid-backend -u pkgname'
+        sys.argv.extend(cmdline.split())
+
+        def frontend_parse(*args, **kwargs):
+            raise upt.exceptions.InvalidPackageNameError('valid-frontend',
+                                                         'pkgname')
+
+        def backend_update(*args, **kwargs):
+            raise upt.upt.PackageUpToDateException('pkgname', '42.0')
+
+        fake_frontend = mock.Mock()
+        fake_frontend().parse.side_effect = frontend_parse
+        m_frontends.return_value = {
+            'valid-frontend': fake_frontend
+        }
+        fake_backend = mock.Mock()
+        fake_backend().update_package.side_effect = backend_update
+        m_backends.return_value = {
+            'valid-backend': fake_backend,
+        }
+        with self.assertRaises(SystemExit):
+            upt.upt.main()
+
+        expected = upt.exceptions.InvalidPackageNameError('valid-frontend',
+                                                          'pkgname')
+        self.assertIn(str(expected), m_stderr.getvalue().split('\n')[-2])
+
 
 class TestArchive(unittest.TestCase):
     def setUp(self):
@@ -426,6 +572,16 @@ class TestBackend(unittest.TestCase):
     def setUp(self):
         self.backend = upt.upt.Backend()
 
+    def test_current_version(self):
+        with mock.patch('builtins.input', return_value='1.2'):
+            frontend = mock.Mock()
+            self.assertEqual(self.backend.current_version(frontend, 'pkg'),
+                             '1.2')
+
+    def test_update_package(self):
+        with self.assertRaises(NotImplementedError):
+            self.backend.update_package(mock.Mock())
+
     def test_needs_requirement_not_packaged(self):
         self.backend.package_versions = lambda x: []
         requirement = upt.PackageRequirement('foo')
@@ -481,3 +637,34 @@ class TestBackend(unittest.TestCase):
         with mock.patch('upt.upt.Backend.needs_requirement_interactive'):
             self.backend.needs_requirement(requirement, None)
             self.backend.needs_requirement_interactive.assert_called()
+
+
+class TestUpdate(unittest.TestCase):
+    def test_update_already_up_to_date(self):
+        frontend = mock.Mock()
+        frontend.parse = mock.Mock(return_value=upt.Package('foo', '1.0'))
+        # The package is already up to date
+        backend = mock.Mock()
+        backend.current_version = mock.Mock(return_value='1.0')
+        with self.assertRaises(upt.upt.PackageUpToDateException) as e:
+            upt.upt.update('foo', '1.0', frontend, backend, None)
+        self.assertEqual(e.exception.pkgname, 'foo')
+        self.assertEqual(e.exception.version, '1.0')
+        self.assertEqual(str(e.exception), "foo is already up-to-date (1.0)")
+
+        # The package is not up to date
+        backend = mock.Mock()
+        backend.current_version = mock.Mock(return_value='0.9')
+        try:
+            upt.upt.update('foo', '1.0', frontend, backend, None)
+        except upt.exceptions.PackageUpToDateException as e:
+            self.fail(f'{e.__class__.__name__} should not have been raised')
+
+    def test_update_not_implemented(self):
+        frontend = mock.Mock()
+        frontend.parse = mock.Mock(return_value=upt.Package('foo', '1.0'))
+        backend = mock.Mock()
+        backend.current_version = mock.Mock(return_value='0.9')
+        backend.update_package = mock.Mock(side_effect=NotImplementedError)
+        with self.assertRaises(SystemExit):
+            upt.upt.update('foo', '1.0', frontend, backend, None)

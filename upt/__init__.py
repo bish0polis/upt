@@ -9,6 +9,7 @@ from .upt import Backend
 from .upt import Frontend
 from .upt import Package
 from .upt import PackageRequirement
+from .upt import PackageDiff
 from .exceptions import InvalidPackageNameError
 from .exceptions import InvalidPackageVersionError
 from .exceptions import UnhandledFrontendError

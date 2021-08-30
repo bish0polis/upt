@@ -4,7 +4,11 @@
 import logging
 import sys
 
-import colorlog
+try:
+    import colorlog
+    color_available = True
+except ModuleNotFoundError:
+    color_available = False
 
 
 class MaxLevelFilter(logging.Filter):
@@ -28,7 +32,14 @@ def create_logger(log_level, colored=False):
     stderr_handler.setLevel(logging.ERROR)
     logger.addHandler(stderr_handler)
 
-    logger.colored = colored
+    if colored and not color_available:
+        logger.colored = False
+        logger_set_formatter(logger, 'upt')
+        logger.warning('You requested colored logs, but the colorlog module '
+                       'could not be found. Switching to black and white '
+                       'logs.')
+    else:
+        logger.colored = colored
 
     return logger
 

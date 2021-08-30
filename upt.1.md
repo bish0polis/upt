@@ -48,6 +48,11 @@ The following subcommands are available:
 list-backends". At least one backend must be installed. If only one backend is
 installed, this is optional; otherwise it is required. See BACKENDS.
 
+-c, \--color
+
+: Show colored logging output. Requires the "colorlog" package, available
+through the "color" extra.
+
 \--debug
 
 : Print debug messages. Cannot be used with \--quiet.

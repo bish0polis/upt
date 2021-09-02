@@ -5,25 +5,25 @@
 
 class InvalidPackageNameError(Exception):
     """Invalid package name or non-existing package."""
-    def __init__(self, backend, pkg_name):
-        self.backend = backend
+    def __init__(self, frontend, pkg_name):
+        self.frontend = frontend
         self.pkg_name = pkg_name
 
     def __str__(self):
-        return (f'The package {self.pkg_name} could not be found by backend '
-                f'{self.backend}')
+        return (f'The package {self.pkg_name} could not be found by frontend '
+                f'{self.frontend}')
 
 
 class InvalidPackageVersionError(Exception):
     """Invalid or non-existing version of a valid package"""
-    def __init__(self, backend, pkg_name, version):
-        self.backend = backend
+    def __init__(self, frontend, pkg_name, version):
+        self.frontend = frontend
         self.pkg_name = pkg_name
         self.version = version
 
     def __str__(self):
         return (f'Version {self.version} of package {self.pkg_name} '
-                f'could not be found by backend {self.backend}')
+                f'could not be found by frontend {self.frontend}')
 
 
 class UnhandledFrontendError(Exception):
